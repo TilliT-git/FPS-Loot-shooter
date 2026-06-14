@@ -19,7 +19,7 @@ public class AmmoManager : MonoBehaviour
     private bool _isReload;
     public bool IsReload => _isReload;
 
-    Coroutine _reloadCoroutine;
+    private Coroutine _reloadCoroutine;
 
     public Action<int, int> onAmmoChanged;
 

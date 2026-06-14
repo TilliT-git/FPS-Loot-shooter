@@ -1,7 +1,9 @@
 using UnityEngine;
 
-public class Pistol : WeaponBase
+public class Shotgun : WeaponBase
 {
+    [SerializeField] protected int _countBullets;
+
     public override void HandleInput()
     {
         base.HandleInput();
@@ -11,6 +13,9 @@ public class Pistol : WeaponBase
 
     public override void BulletSpawn()
     {
-        base.BulletSpawn();
+        for (int i = 0; i < _countBullets; i++)
+        {
+            base.BulletSpawn();
+        }
     }
 }

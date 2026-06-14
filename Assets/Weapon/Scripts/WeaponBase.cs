@@ -3,13 +3,18 @@ using UnityEngine;
 
 public abstract class WeaponBase : MonoBehaviour
 {
-    private AmmoManager _ammoManager;
+    public AmmoManager _ammoManager;
 
-    [SerializeField] private float _forceRecoil;
-    [SerializeField] private float _rayOffset;
-    [SerializeField] private float _maxDistance;
+    [SerializeField] protected float _forceRecoil;
+    [SerializeField] protected float _rayOffset;
+    [SerializeField] protected float _maxDistance;
+    [SerializeField] protected float _spreadMultiplierY;
+    [SerializeField] protected float _spreadMultiplierX;
 
     private Vector3 _startPos;
+    private Vector3 _currentPos;
+    private Vector3 _startRot;
+    private Vector3 _currentRot;
 
     public Action onShoot;
     public Action onReload;
@@ -19,37 +24,64 @@ public abstract class WeaponBase : MonoBehaviour
         _ammoManager = GetComponent<AmmoManager>();
 
         _startPos = transform.localPosition;
+        _startRot = transform.localEulerAngles;
     }
 
     private void Update()
     {
+        HandleInput();
+
         if (Input.GetKeyDown(KeyCode.R)) TryReload();
 
-        Ray ray = new Ray(transform.position + transform.forward * _rayOffset, transform.forward);
+        VisualRecoil();
+    }
+
+    public virtual void HandleInput()
+    {
+        if (Input.GetKeyDown(KeyCode.R)) TryReload();
+    }
+
+    private void VisualRecoil()
+    {
+        _currentPos = Vector3.Lerp(_currentPos, Vector3.zero, 5f * Time.deltaTime);
+        _currentRot = Vector3.Lerp(_currentRot, Vector3.zero, 5f * Time.deltaTime);
+
+        transform.localPosition = _startPos + _currentPos;
+        transform.localRotation = Quaternion.Euler(_startRot + _currentRot);
+    }    
+
+    public virtual void TryShoot()
+    {
+        BulletSpawn();
+        Recoil();
+        onShoot?.Invoke();
+    }
+
+    public Vector3 CastSingleRay()
+    {
+        return new Vector3(UnityEngine.Random.insideUnitCircle.y * _spreadMultiplierY, UnityEngine.Random.insideUnitCircle.x * _spreadMultiplierX, 0f);
+    }
+
+    public virtual bool CanShoot()
+    {
+        return !_ammoManager.IsReload && _ammoManager.CurrentAmmoInMag > 0;
+    }
+
+    public virtual void BulletSpawn()
+    {
         RaycastHit hit;
+        Ray ray = new Ray(transform.position + transform.forward * _rayOffset, transform.forward + CastSingleRay());
 
-        if (Physics.Raycast(ray, out hit, _maxDistance) && Input.GetMouseButtonDown(0))
+        if (Physics.Raycast(ray, out hit))
         {
-            TryShoot();
-            Debug.Log($"{hit.collider.gameObject.name}");
-        }
-        Debug.DrawRay(transform.position + transform.forward * _rayOffset, transform.forward * _maxDistance, Color.red);
-
-        transform.localPosition = Vector3.Lerp(transform.localPosition, _startPos, 5f * Time.deltaTime);
-    }
-
-    private void TryShoot()
-    {
-        if (!_ammoManager.IsReload && _ammoManager.CurrentAmmoInMag > 0)
-        {
-            onShoot?.Invoke();
-            Recoil();
+            Debug.Log($"POPAL B: {hit.collider.name}");
         }
     }
 
-    private void Recoil()
+    public void Recoil()
     {
-        transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, _forceRecoil);
+        _currentPos.z += _forceRecoil;
+        _currentRot.x += _forceRecoil * 20f;
     }
 
     private void TryReload()

@@ -1,12 +1,12 @@
 using UnityEngine;
 
-public class Pistol : WeaponBase
+public class Rifle : WeaponBase
 {
     public override void HandleInput()
     {
         base.HandleInput();
 
-        if (Input.GetMouseButtonDown(0) && CanShoot()) TryShoot();
+        if (Input.GetMouseButton(0) && CanShoot()) TryShoot();
     }
 
     public override void BulletSpawn()
