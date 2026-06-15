@@ -305,7 +305,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -4.766436, y: 4.0823655, z: 2.3024201}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 8, z: 20}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1187,11 +1187,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _ammoManager: {fileID: 0}
-  _forceRecoil: -0.5
-  _rayOffset: 0.55
+  _decal: {fileID: 1165599311015466669, guid: b095b3251af25b54796e7a43b4794e53, type: 3}
+  _swayAmount: 0
+  _maxSwayAmount: 0
+  _swaySmoothing: 0
+  _tiltAmount: 0
+  _maxTiltAmount: 0
+  _tiltSmoothing: 0
+  _forceRecoilPos: 0
+  _forceRecoilRot: 0
+  _fireRate: 0
+  _rayOffset: 1
   _maxDistance: 25
   _spreadMultiplierY: 0
   _spreadMultiplierX: 0
+  _aimingPos: {x: -0.65, y: 0, z: 0}
+  _aimingRot: {x: 0, y: 0, z: 0}
 --- !u!114 &1225987768
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1204,8 +1215,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97e7a4ec607018248bf6ea2c4e1309e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxAmmo: 10
-  _maxAmmoInMag: 10
+  _maxAmmo: 120
+  _ammoInMag: 10
   _reloadTime: 2
 --- !u!1 &1369458948
 GameObject:
@@ -1429,7 +1440,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af85f15684683b6448509e076efb9e19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _ammoManager: {fileID: 2091735423}
+  _weaponChanger: {fileID: 1967019937}
 --- !u!1 &1693946723
 GameObject:
   m_ObjectHideFlags: 0
@@ -1551,7 +1562,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxAmmo: 10000
-  _maxAmmoInMag: 10000
+  _ammoInMag: 100
   _reloadTime: 2
 --- !u!65 &1821313615
 BoxCollider:
@@ -1637,11 +1648,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _ammoManager: {fileID: 0}
-  _forceRecoil: -1
+  _decal: {fileID: 1165599311015466669, guid: b095b3251af25b54796e7a43b4794e53, type: 3}
+  _swayAmount: 5
+  _maxSwayAmount: 0.1
+  _swaySmoothing: 0.025
+  _tiltAmount: 1
+  _maxTiltAmount: 5
+  _tiltSmoothing: 5
+  _forceRecoilPos: -0.4
+  _forceRecoilRot: -15
+  _fireRate: 1.2
   _rayOffset: 0.55
   _maxDistance: 15
-  _spreadMultiplierY: 100
-  _spreadMultiplierX: 100
+  _spreadMultiplierY: 1
+  _spreadMultiplierX: 0.25
+  _aimingPos: {x: -0.65, y: 0, z: 0}
+  _aimingRot: {x: 0, y: 0, z: 0}
   _countBullets: 100
 --- !u!1 &1967019935
 GameObject:
@@ -1729,7 +1751,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxAmmo: 10000
-  _maxAmmoInMag: 10000
+  _ammoInMag: 100
   _reloadTime: 2
 --- !u!114 &2091735424
 MonoBehaviour:
@@ -1744,11 +1766,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _ammoManager: {fileID: 0}
-  _forceRecoil: -0.25
+  _decal: {fileID: 1165599311015466669, guid: b095b3251af25b54796e7a43b4794e53, type: 3}
+  _swayAmount: 0
+  _maxSwayAmount: 0
+  _swaySmoothing: 0
+  _tiltAmount: 0
+  _maxTiltAmount: 0
+  _tiltSmoothing: 0
+  _forceRecoilPos: -0.125
+  _forceRecoilRot: -15
+  _fireRate: 0.12
   _rayOffset: 0.55
   _maxDistance: 100
   _spreadMultiplierY: 10
   _spreadMultiplierX: 3
+  _aimingPos: {x: -0.65, y: 0, z: 0}
+  _aimingRot: {x: 0, y: 0, z: 0}
 --- !u!65 &2091735425
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -6,15 +6,14 @@ using UnityEngine;
 public class AmmoManager : MonoBehaviour
 {
     [SerializeField] private int _maxAmmo;
-    [SerializeField] private int _maxAmmoInMag;
+    [SerializeField] public int _ammoInMag;
     [SerializeField] private int _reloadTime;
 
     private WeaponBase _weaponBase;
     private TextMeshProUGUI _ammoTextUI;
 
-    private int _currentAmmo;
-    private int _currentAmmoInMag;
-    public int CurrentAmmoInMag => _currentAmmoInMag;
+    public int CurrentAmmo { get; private set; }
+    public int CurrentAmmoInMag { get; private set; }
 
     private bool _isReload;
     public bool IsReload => _isReload;
@@ -25,17 +24,17 @@ public class AmmoManager : MonoBehaviour
 
     private void Awake()
     {
-        _currentAmmo = _maxAmmo;
-        _currentAmmoInMag = _maxAmmoInMag;
+        CurrentAmmo = _maxAmmo;
+        CurrentAmmoInMag = _ammoInMag;
 
         _weaponBase = GetComponent<WeaponBase>();
-        AmmoChanged();
     }
 
     private void OnEnable()
     {
         _weaponBase.onShoot += RemoveAmmo;
         _weaponBase.onReload += StartReload;
+        AmmoChanged();
     }
 
     private void OnDisable()
@@ -46,9 +45,9 @@ public class AmmoManager : MonoBehaviour
 
     private void RemoveAmmo()
     {
-        if (_currentAmmoInMag > 0 && !_isReload)
+        if (CurrentAmmoInMag > 0 && !_isReload)
         {
-            _currentAmmoInMag--;
+            CurrentAmmoInMag--;
             AmmoChanged();
         }
         else
@@ -59,7 +58,7 @@ public class AmmoManager : MonoBehaviour
 
     private void StartReload()
     {
-        if (_currentAmmoInMag < _maxAmmoInMag && _currentAmmo > 0 && !_isReload)
+        if (CurrentAmmoInMag < _ammoInMag && CurrentAmmo > 0 && !_isReload)
         {
             _reloadCoroutine = StartCoroutine(Reload());
         }
@@ -73,17 +72,17 @@ public class AmmoManager : MonoBehaviour
 
         yield return new WaitForSeconds(_reloadTime);
 
-        int ammoNeeded = _maxAmmoInMag - _currentAmmoInMag;
+        int ammoNeeded = _ammoInMag - CurrentAmmoInMag;
 
-        if (_currentAmmo > ammoNeeded)
+        if (CurrentAmmo > ammoNeeded)
         {
-            _currentAmmo -= ammoNeeded;
-            _currentAmmoInMag += ammoNeeded;
+            CurrentAmmo -= ammoNeeded;
+            CurrentAmmoInMag += ammoNeeded;
         }
         else
         {
-            _currentAmmoInMag += _currentAmmo;
-            _currentAmmo = 0;
+            CurrentAmmoInMag += CurrentAmmo;
+            CurrentAmmo = 0;
         }
 
         AmmoChanged();
@@ -95,6 +94,6 @@ public class AmmoManager : MonoBehaviour
 
     private void AmmoChanged()
     {
-        onAmmoChanged?.Invoke(_currentAmmoInMag, _currentAmmo);
+        onAmmoChanged?.Invoke(CurrentAmmoInMag, CurrentAmmo);
     }
 }

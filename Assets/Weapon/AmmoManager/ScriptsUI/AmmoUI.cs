@@ -1,25 +1,51 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class AmmoUI : MonoBehaviour
 {
-    [SerializeField] private AmmoManager _ammoManager;
+    [SerializeField] private WeaponChanger _weaponChanger;
 
+    private AmmoManager _ammoManager;
     private TextMeshProUGUI _ammoText;
 
-    private void Awake()
+    private void Start()
     {
         _ammoText = GetComponent<TextMeshProUGUI>();
-    }
 
-    private void OnEnable()
-    {
-        _ammoManager.onAmmoChanged += UpdateAmmoUI;
+        if (_weaponChanger != null)
+        {
+            _weaponChanger.onWeaponChanged += SetAmmoUI;
+        }
     }
 
     private void OnDisable()
     {
-        _ammoManager.onAmmoChanged -= UpdateAmmoUI;
+        if (_weaponChanger != null)
+        {
+            _weaponChanger.onWeaponChanged -= SetAmmoUI;
+        }
+        if (_ammoManager != null)
+        {
+            _ammoManager.onAmmoChanged -= UpdateAmmoUI;
+        }
+    }
+
+    private void SetAmmoUI(List<GameObject> weapons, int index)
+    {
+        if (_ammoManager != null)
+        {
+            _ammoManager.onAmmoChanged -= UpdateAmmoUI;
+        }
+
+        _ammoManager = weapons[index].GetComponent<AmmoManager>();
+
+        if (_ammoManager != null)
+        {
+            _ammoManager.onAmmoChanged += UpdateAmmoUI;
+        }
+
+        UpdateAmmoUI(_ammoManager.CurrentAmmoInMag, _ammoManager.CurrentAmmo);
     }
 
     private void UpdateAmmoUI(int ammoInMag, int ammoReserve)

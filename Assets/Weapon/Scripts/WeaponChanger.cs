@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
+using System;
 
 public class WeaponChanger : MonoBehaviour
 {
@@ -10,6 +11,13 @@ public class WeaponChanger : MonoBehaviour
     private int _currentWeapon = 0;
 
     private Coroutine _changeWeaponCoroutine;
+
+    public Action<List<GameObject>, int> onWeaponChanged;
+
+    private void Start()
+    {
+        WeaponChanged();
+    }
 
     private void Update()
     {
@@ -80,5 +88,11 @@ public class WeaponChanger : MonoBehaviour
         yield return new WaitForSeconds(_timeChangeWeapon);
         _weapons[currentWeapon].SetActive(true);
         _changeWeaponCoroutine = null;
+        WeaponChanged();
+    }
+
+    private void WeaponChanged()
+    {
+        onWeaponChanged?.Invoke(_weapons, _currentWeapon);
     }
 }
