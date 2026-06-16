@@ -1,12 +1,13 @@
+using Cinemachine;
+using Mirror;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
-    public static PlayerController Instance { get; private set; }
-
     private CharacterController _characterController;
 
     [SerializeField] private Camera _mainCamera;
+    private CinemachineVirtualCamera _virtualCamera;
 
     [SerializeField] private float _speed;
     [SerializeField] private float _jumpForce;
@@ -19,22 +20,36 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
+        _characterController = GetComponent<CharacterController>();
+    }
 
+    private void Start()
+    {
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
 
-        _characterController = GetComponent<CharacterController>();
+        _virtualCamera = GetComponentInChildren<CinemachineVirtualCamera>();
+
+        if (isLocalPlayer)
+        {
+            if (_virtualCamera != null)
+            {
+                _virtualCamera.Follow = transform;
+                _virtualCamera.LookAt = null;
+            }
+        }
+        else
+        {
+            if (_virtualCamera != null)
+            {
+                _virtualCamera.gameObject.SetActive(false);
+            }
+        }
     }
 
     private void Update()
     {
-        transform.eulerAngles = new Vector3(0f, _mainCamera.transform.eulerAngles.y, 0f);
+        if (!isLocalPlayer) return;
 
         _horizontalInput = Input.GetAxis("Horizontal");
         _verticalInput = Input.GetAxis("Vertical");
@@ -44,16 +59,14 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (!isLocalPlayer) return;
         Movement();
     }
 
     private void Movement()
     {
-        float horizontal = _horizontalInput;
-        float vertical = _verticalInput;
-
-        Vector3 horizontalMove = transform.right * horizontal;
-        Vector3 verticalMove = transform.forward * vertical;
+        Vector3 horizontalMove = transform.right * _horizontalInput;
+        Vector3 verticalMove = transform.forward * _verticalInput;
 
         if (_characterController.isGrounded)
         {

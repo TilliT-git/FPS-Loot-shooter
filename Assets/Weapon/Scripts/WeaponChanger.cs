@@ -2,8 +2,9 @@ using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
 using System;
+using Mirror;
 
-public class WeaponChanger : MonoBehaviour
+public class WeaponChanger : NetworkBehaviour
 {
     [SerializeField] private float _timeChangeWeapon;
     [SerializeField] private List<GameObject> _weapons;
@@ -16,11 +17,15 @@ public class WeaponChanger : MonoBehaviour
 
     private void Start()
     {
+        if (!isLocalPlayer) return;
+
         WeaponChanged();
     }
 
     private void Update()
     {
+        if (!isLocalPlayer) return;
+
         ScrollMouseWeapon();
         KeyChangeWeapon();
     }

@@ -122,6 +122,11 @@ public abstract class WeaponBase : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit) && hit.collider.gameObject != null)
         {
+            if (hit.collider.gameObject.TryGetComponent<PlayerHealth>(out PlayerHealth playerHealth))
+            {
+                playerHealth.TakeDamage(10f);
+            }
+
             Vector3 decalPos = hit.point + (hit.normal * 0.005f);
             Quaternion decalRot = Quaternion.LookRotation(-hit.normal);
             GameObject decal = Instantiate(_decal, decalPos, decalRot);
