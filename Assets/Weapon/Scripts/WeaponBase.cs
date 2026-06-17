@@ -1,7 +1,8 @@
+using Mirror;
 using System;
 using UnityEngine;
 
-public abstract class WeaponBase : MonoBehaviour
+public abstract class WeaponBase : NetworkBehaviour
 {
     public AmmoManager _ammoManager;
 
@@ -17,6 +18,7 @@ public abstract class WeaponBase : MonoBehaviour
     [SerializeField] protected float _forceRecoilPos;
     [SerializeField] protected float _forceRecoilRot;
     [SerializeField] protected float _fireRate;
+    [SerializeField] protected float _damageAmount;
     [SerializeField] protected float _rayOffset;
     [SerializeField] protected float _maxDistance;
     [SerializeField] protected float _spreadMultiplierY;
@@ -45,6 +47,8 @@ public abstract class WeaponBase : MonoBehaviour
     {
         _ammoManager = GetComponent<AmmoManager>();
 
+        if (!isLocalPlayer) return;
+
         _startPos = transform.localPosition;
         _startRot = transform.localEulerAngles;
         _targetPos = _startPos;
@@ -53,6 +57,8 @@ public abstract class WeaponBase : MonoBehaviour
 
     private void Update()
     {
+        if (!isLocalPlayer) return;
+
         HandleInput();
         WeaponSway();
         VisualRecoil();
@@ -122,9 +128,11 @@ public abstract class WeaponBase : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit) && hit.collider.gameObject != null)
         {
-            if (hit.collider.gameObject.TryGetComponent<PlayerHealth>(out PlayerHealth playerHealth))
+            PlayerHealth playerHealth = hit.collider.gameObject.GetComponent<PlayerHealth>();
+
+            if (playerHealth != null)
             {
-                playerHealth.TakeDamage(10f);
+                CmdDamage(playerHealth, _damageAmount);
             }
 
             Vector3 decalPos = hit.point + (hit.normal * 0.005f);
@@ -132,6 +140,15 @@ public abstract class WeaponBase : MonoBehaviour
             GameObject decal = Instantiate(_decal, decalPos, decalRot);
             decal.transform.SetParent(hit.collider.transform);
             Debug.Log($"POPAL B: {hit.collider.name}");
+        }
+    }
+
+    [Command]
+    private void CmdDamage(PlayerHealth playerHealth, float damageAmount)
+    {
+        if (playerHealth != null)
+        {
+            playerHealth.TakeDamage(damageAmount);
         }
     }
 

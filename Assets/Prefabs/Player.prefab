@@ -131,6 +131,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91d89102a905fc546b36508aa9185e9a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   _timeChangeWeapon: 0.5
   _weapons:
   - {fileID: 6223749131663045614}
@@ -147,7 +150,6 @@ GameObject:
   - component: {fileID: 9109353402926560783}
   - component: {fileID: 8473376155810986214}
   - component: {fileID: 7946129912329244231}
-  - component: {fileID: 5003911683351384234}
   - component: {fileID: 6419016184003059686}
   - component: {fileID: 8141003121516935873}
   m_Layer: 0
@@ -222,27 +224,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &5003911683351384234
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2997639210485969205}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &6419016184003059686
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -255,6 +236,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97e7a4ec607018248bf6ea2c4e1309e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   _maxAmmo: 10000
   _ammoInMag: 100
   _reloadTime: 2
@@ -270,6 +254,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b0679076d64ad846b80746bddf8d42e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   _ammoManager: {fileID: 0}
   _decal: {fileID: 1165599311015466669, guid: b095b3251af25b54796e7a43b4794e53, type: 3}
   _swayAmount: 0.025
@@ -281,6 +268,7 @@ MonoBehaviour:
   _forceRecoilPos: -0.4
   _forceRecoilRot: -15
   _fireRate: 1.2
+  _damageAmount: 1
   _rayOffset: 0.55
   _maxDistance: 15
   _spreadMultiplierY: 1
@@ -299,7 +287,6 @@ GameObject:
   - component: {fileID: 4820673680500463940}
   - component: {fileID: 2703286076967615220}
   - component: {fileID: 3906868292222146488}
-  - component: {fileID: 2567119721830178067}
   - component: {fileID: 2470342619401184992}
   - component: {fileID: 4361277200073351879}
   m_Layer: 0
@@ -374,27 +361,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &2567119721830178067
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4314406774984716776}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &2470342619401184992
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -407,6 +373,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97e7a4ec607018248bf6ea2c4e1309e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   _maxAmmo: 10000
   _ammoInMag: 100
   _reloadTime: 2
@@ -422,6 +391,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67d333964447fb149b72c26b173f7afe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   _ammoManager: {fileID: 0}
   _decal: {fileID: 1165599311015466669, guid: b095b3251af25b54796e7a43b4794e53, type: 3}
   _swayAmount: 0
@@ -433,6 +405,7 @@ MonoBehaviour:
   _forceRecoilPos: -0.125
   _forceRecoilRot: -15
   _fireRate: 0.12
+  _damageAmount: 0
   _rayOffset: 0.55
   _maxDistance: 100
   _spreadMultiplierY: 10
@@ -455,6 +428,7 @@ GameObject:
   - component: {fileID: 7944440035925694068}
   - component: {fileID: -2040426219918421367}
   - component: {fileID: -4872182992595241153}
+  - component: {fileID: 2310245335767366890}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -587,7 +561,7 @@ MonoBehaviour:
   compressRotation: 1
   interpolatePosition: 1
   interpolateRotation: 1
-  interpolateScale: 1
+  interpolateScale: 0
   coordinateSpace: 0
   timelineOffset: 1
   showGizmos: 0
@@ -610,6 +584,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 701c04fa5d595224491bf8df1bbf2a61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   _maxHealth: 100
 --- !u!114 &-4872182992595241153
 MonoBehaviour:
@@ -626,6 +603,22 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+--- !u!114 &2310245335767366890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5471433730659023384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68bfa3046988d364cb67bc3acdf949d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  _uiCanvasPrefab: {fileID: 9013534821588842006, guid: e555b742d33a34944b65d34a0e2df238, type: 3}
 --- !u!1 &6223749131663045614
 GameObject:
   m_ObjectHideFlags: 0
@@ -637,7 +630,6 @@ GameObject:
   - component: {fileID: 8720230444488016547}
   - component: {fileID: 2028695459019602732}
   - component: {fileID: 6542066860209668741}
-  - component: {fileID: 5032966388494628111}
   - component: {fileID: 3623900181992452581}
   - component: {fileID: 7636097441498154391}
   m_Layer: 0
@@ -646,7 +638,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8720230444488016547
 Transform:
   m_ObjectHideFlags: 0
@@ -712,27 +704,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &5032966388494628111
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6223749131663045614}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &3623900181992452581
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -745,6 +716,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97e7a4ec607018248bf6ea2c4e1309e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   _maxAmmo: 120
   _ammoInMag: 10
   _reloadTime: 2
@@ -760,6 +734,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe0ddbae8e240c741a901bee8f83fb38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   _ammoManager: {fileID: 0}
   _decal: {fileID: 1165599311015466669, guid: b095b3251af25b54796e7a43b4794e53, type: 3}
   _swayAmount: 0
@@ -771,6 +748,7 @@ MonoBehaviour:
   _forceRecoilPos: 0
   _forceRecoilRot: 0
   _fireRate: 0
+  _damageAmount: 5
   _rayOffset: 1
   _maxDistance: 25
   _spreadMultiplierY: 0

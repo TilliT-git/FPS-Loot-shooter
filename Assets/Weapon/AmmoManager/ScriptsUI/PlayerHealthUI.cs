@@ -1,38 +1,57 @@
+using TMPro;
 using UnityEngine;
 
 public class PlayerHealthUI : MonoBehaviour
 {
-    [SerializeField] private PlayerHealth _playerHealth;
+    private RectTransform _rectTransform;
     [SerializeField] private float _speedHealthBarAnim;
 
-    private RectTransform _rectTransform;
+    private PlayerHealth _playerHealth;
 
     private Vector2 _targetScale;
 
-    private void Start()
+    private void Awake()
     {
-        _rectTransform = GetComponent<RectTransform>();
+        if (_rectTransform == null)
+        {
+            _rectTransform = GetComponent<RectTransform>();
+        }
         _targetScale = _rectTransform.localScale;
     }
 
-    private void OnEnable()
+    public void Initialize(PlayerHealth playerHealth)
     {
-        _playerHealth.onHealthChange += UpdateHealthUI;
+        _playerHealth = playerHealth;
+
+        if (_playerHealth != null)
+        {
+            _playerHealth.onHealthChange += UpdateHealthUI;
+
+            UpdateHealthUI(playerHealth.CurrentHealth, playerHealth.MaxHealth);
+        }
     }
 
     private void OnDisable()
     {
-        _playerHealth.onHealthChange -= UpdateHealthUI;
+        if (_playerHealth != null)
+        {
+            _playerHealth.onHealthChange -= UpdateHealthUI;
+        }
     }
 
     private void Update()
     {
-        _rectTransform.localScale = Vector2.Lerp(_rectTransform.localScale, _targetScale, _speedHealthBarAnim * Time.deltaTime);
+        if (_rectTransform != null)
+        {
+            _rectTransform.localScale = Vector2.Lerp(_rectTransform.localScale, _targetScale, _speedHealthBarAnim * Time.deltaTime);
+        }
     }
 
     private void UpdateHealthUI(float currentHealth, float maxHealth)
     {
-        _targetScale.x = currentHealth / maxHealth;
-        _targetScale = new Vector2(_targetScale.x, _rectTransform.localScale.y);
+        if (maxHealth <= 0) return;
+
+        float healthPercentage = Mathf.Clamp01(currentHealth / maxHealth);
+        _targetScale = new Vector2(healthPercentage, _rectTransform.localScale.y);
     }
 }

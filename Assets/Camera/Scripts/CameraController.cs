@@ -11,14 +11,12 @@ public class CameraController : NetworkBehaviour
     private void Start()
     {
         if (!isLocalPlayer) return;
-        
+
         _playerCamera = GetComponentInChildren<Camera>();
     }
 
     private void Update()
     {
-        if (!isLocalPlayer) return;
-
         CameraRotate();
     }
 

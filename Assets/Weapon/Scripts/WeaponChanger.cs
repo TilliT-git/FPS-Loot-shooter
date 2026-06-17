@@ -17,8 +17,7 @@ public class WeaponChanger : NetworkBehaviour
 
     private void Start()
     {
-        if (!isLocalPlayer) return;
-
+        _weapons[0].SetActive(true);
         WeaponChanged();
     }
 

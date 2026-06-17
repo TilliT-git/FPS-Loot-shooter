@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class AmmoUI : MonoBehaviour
 {
-    [SerializeField] private WeaponChanger _weaponChanger;
-
+    private WeaponChanger _weaponChanger;
     private AmmoManager _ammoManager;
     private TextMeshProUGUI _ammoText;
 
-    private void Start()
+    public void Initialize(WeaponChanger weaponChanger)
     {
-        _ammoText = GetComponent<TextMeshProUGUI>();
+        _ammoText = GetComponentInChildren<TextMeshProUGUI>();
+        _weaponChanger = weaponChanger;
 
         if (_weaponChanger != null)
         {
@@ -43,9 +43,8 @@ public class AmmoUI : MonoBehaviour
         if (_ammoManager != null)
         {
             _ammoManager.onAmmoChanged += UpdateAmmoUI;
+            UpdateAmmoUI(_ammoManager.CurrentAmmoInMag, _ammoManager.CurrentAmmo);
         }
-
-        UpdateAmmoUI(_ammoManager.CurrentAmmoInMag, _ammoManager.CurrentAmmo);
     }
 
     private void UpdateAmmoUI(int ammoInMag, int ammoReserve)

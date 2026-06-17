@@ -1,19 +1,24 @@
+using Mirror;
 using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
 
-public class AmmoManager : MonoBehaviour
+public class AmmoManager : NetworkBehaviour
 {
-    [SerializeField] private int _maxAmmo;
-    [SerializeField] public int _ammoInMag;
-    [SerializeField] private int _reloadTime;
+    [SerializeField] protected int _maxAmmo;
+    [SerializeField] protected int _ammoInMag;
+    [SerializeField] protected float _reloadTime;
 
     private WeaponBase _weaponBase;
-    private TextMeshProUGUI _ammoTextUI;
 
-    public int CurrentAmmo { get; private set; }
-    public int CurrentAmmoInMag { get; private set; }
+    [SyncVar(hook = nameof(OnCurrentAmmoChanged))]
+    private int _currentAmmo;
+    public int CurrentAmmo => _currentAmmo;
+
+    [SyncVar(hook = nameof(OnCurrentAmmoInMagChanged))]
+    private int _currentAmmoInMag;
+    public int CurrentAmmoInMag => _currentAmmoInMag;
 
     private bool _isReload;
     public bool IsReload => _isReload;
@@ -24,31 +29,54 @@ public class AmmoManager : MonoBehaviour
 
     private void Awake()
     {
-        CurrentAmmo = _maxAmmo;
-        CurrentAmmoInMag = _ammoInMag;
-
         _weaponBase = GetComponent<WeaponBase>();
+    }
+
+    public override void OnStartServer()
+    {
+        base.OnStartServer();
+        _currentAmmo = _maxAmmo;
+        _currentAmmoInMag = _ammoInMag;
+    }
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        AmmoChanged();
     }
 
     private void OnEnable()
     {
-        _weaponBase.onShoot += RemoveAmmo;
-        _weaponBase.onReload += StartReload;
-        AmmoChanged();
+        if (_weaponBase != null)
+        {
+            _weaponBase.onShoot += RemoveAmmo;
+            _weaponBase.onReload += StartReload;
+        }
     }
 
     private void OnDisable()
     {
-        _weaponBase.onShoot -= RemoveAmmo;
-        _weaponBase.onReload -= StartReload;
+        if (_weaponBase != null)
+        {
+            _weaponBase.onShoot -= RemoveAmmo;
+            _weaponBase.onReload -= StartReload;
+        }
     }
+
+    private void OnCurrentAmmoChanged(int oldAmmo, int newAmmo) => AmmoChanged();
+    private void OnCurrentAmmoInMagChanged(int oldMag, int newMag) => AmmoChanged();
 
     private void RemoveAmmo()
     {
-        if (CurrentAmmoInMag > 0 && !_isReload)
+        CmdRemoveAmmo();
+    }
+
+    [Command]
+    private void CmdRemoveAmmo()
+    {
+        if (_currentAmmoInMag > 0 && !_isReload)
         {
-            CurrentAmmoInMag--;
-            AmmoChanged();
+            _currentAmmoInMag--;
         }
         else
         {
@@ -58,7 +86,16 @@ public class AmmoManager : MonoBehaviour
 
     private void StartReload()
     {
-        if (CurrentAmmoInMag < _ammoInMag && CurrentAmmo > 0 && !_isReload)
+        if (_currentAmmoInMag < _ammoInMag && CurrentAmmo > 0 && !_isReload)
+        {
+            CmdStartReload();
+        }
+    }
+
+    [Command]
+    private void CmdStartReload()
+    {
+        if (_currentAmmoInMag < _ammoInMag && CurrentAmmo > 0 && !_isReload)
         {
             _reloadCoroutine = StartCoroutine(Reload());
         }
@@ -72,20 +109,19 @@ public class AmmoManager : MonoBehaviour
 
         yield return new WaitForSeconds(_reloadTime);
 
-        int ammoNeeded = _ammoInMag - CurrentAmmoInMag;
+        int ammoNeeded = _ammoInMag - _currentAmmoInMag;
 
-        if (CurrentAmmo > ammoNeeded)
+        if (_currentAmmo > ammoNeeded)
         {
-            CurrentAmmo -= ammoNeeded;
-            CurrentAmmoInMag += ammoNeeded;
+            _currentAmmo -= ammoNeeded;
+            _currentAmmoInMag += ammoNeeded;
         }
         else
         {
-            CurrentAmmoInMag += CurrentAmmo;
-            CurrentAmmo = 0;
+            _currentAmmoInMag += CurrentAmmo;
+            _currentAmmo = 0;
         }
 
-        AmmoChanged();
         _isReload = false;
         _reloadCoroutine = null;
 
@@ -94,6 +130,9 @@ public class AmmoManager : MonoBehaviour
 
     private void AmmoChanged()
     {
-        onAmmoChanged?.Invoke(CurrentAmmoInMag, CurrentAmmo);
+        if (isLocalPlayer)
+        {
+            onAmmoChanged?.Invoke(_currentAmmoInMag, _currentAmmo);
+        }
     }
 }

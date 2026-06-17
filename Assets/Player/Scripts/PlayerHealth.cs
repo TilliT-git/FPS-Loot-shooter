@@ -1,31 +1,53 @@
+using Mirror;
 using System;
 using UnityEngine;
 
-public class PlayerHealth : MonoBehaviour
+public class PlayerHealth : NetworkBehaviour
 {
     [SerializeField] protected float _maxHealth;
+    public float MaxHealth => _maxHealth;
 
+    [SyncVar(hook = nameof(OnHealthChangedHook))]
     private float _currentHealth;
+    public float CurrentHealth => _currentHealth;
 
     public Action <float, float> onHealthChange;
 
-    private void Awake()
+    public override void OnStartServer()
     {
+        base.OnStartServer();
         _currentHealth = _maxHealth;
     }
 
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        HealthChange(_currentHealth, _maxHealth);
+    }
+
+    private void OnHealthChangedHook(float oldHealth, float newHealth)
+    {
+        HealthChange(newHealth, _maxHealth);
+
+        if (newHealth <= 0f)
+        {
+            Death();
+        }
+    }
+
+    [Server]
     public void TakeDamage(float damageAmount)
     {
         if (_currentHealth > 0f)
         {
             _currentHealth -= damageAmount;
-        }
-        else
-        {
-            Death();
-        }
 
-        HealthChange(_currentHealth, _maxHealth);
+            if (_currentHealth <= 0f)
+            {
+                _currentHealth = 0f;
+                Death();
+            }
+        }
     }
 
     private void Death()
@@ -34,8 +56,8 @@ public class PlayerHealth : MonoBehaviour
         Debug.Log("DEATH");
     }
 
-    private void HealthChange(float curerntHealth, float maxHealth)
+    private void HealthChange(float currentHealth, float maxHealth)
     {
-        onHealthChange?.Invoke(_currentHealth, maxHealth);
+        onHealthChange?.Invoke(currentHealth, maxHealth);
     }
 }

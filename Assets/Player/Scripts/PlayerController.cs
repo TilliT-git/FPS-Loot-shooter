@@ -18,39 +18,26 @@ public class PlayerController : NetworkBehaviour
     private float _horizontalInput;
     private float _verticalInput;
 
-    private void Awake()
-    {
-        _characterController = GetComponent<CharacterController>();
-    }
-
     private void Start()
     {
+        if (!isLocalPlayer)
+        {
+            this.enabled = false;
+
+            Camera playerCam = GetComponentInChildren<Camera>();
+            if (playerCam != null) playerCam.enabled = false;
+
+            return;
+        }
+
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
 
-        _virtualCamera = GetComponentInChildren<CinemachineVirtualCamera>();
-
-        if (isLocalPlayer)
-        {
-            if (_virtualCamera != null)
-            {
-                _virtualCamera.Follow = transform;
-                _virtualCamera.LookAt = null;
-            }
-        }
-        else
-        {
-            if (_virtualCamera != null)
-            {
-                _virtualCamera.gameObject.SetActive(false);
-            }
-        }
+        _characterController = GetComponent<CharacterController>();
     }
 
     private void Update()
     {
-        if (!isLocalPlayer) return;
-
         _horizontalInput = Input.GetAxis("Horizontal");
         _verticalInput = Input.GetAxis("Vertical");
 
@@ -59,7 +46,6 @@ public class PlayerController : NetworkBehaviour
 
     private void FixedUpdate()
     {
-        if (!isLocalPlayer) return;
         Movement();
     }
 
