@@ -17,6 +17,8 @@ public abstract class WeaponBase : NetworkBehaviour
     [SerializeField] protected float _tiltAmount;
     [SerializeField] protected float _maxTiltAmount;
     [SerializeField] protected float _tiltSmoothing;
+    [SerializeField] private float _forceVisualRecoil;
+    [SerializeField] private float _aimingForceVisualRecoil;
 
     [SerializeField] protected float _forceRecoilPos;
     [SerializeField] protected float _forceRecoilVerticalRot;
@@ -77,8 +79,9 @@ public abstract class WeaponBase : NetworkBehaviour
         VisualRecoil();
         ShotDelay();
 
-        Debug.DrawRay(_camera.transform.position, _camera.transform.forward * 100f);
+        Ray ray = _camera.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
 
+        Debug.DrawRay(transform.position, ray.direction * 100f);
 
         transform.localPosition = _targetPos + _currentPos + _swayPos;
         transform.localRotation = Quaternion.Euler(_targetRot + _currentRot + _swayRot);
@@ -113,14 +116,14 @@ public abstract class WeaponBase : NetworkBehaviour
     {
         if (_isAiming)
         {
-            _currentRot = Vector3.Lerp(_currentRot * (_aimingSpreadMultiplierX * _aimingSpreadMultiplierY), _startRot, 10f * Time.deltaTime);
+            _currentRot = Vector3.Lerp(_currentRot * _aimingForceVisualRecoil, _startRot, 10f * Time.deltaTime);
         }
         else
         {
             _currentRot = Vector3.Lerp(_currentRot, _startRot, 5f * Time.deltaTime);
         }
 
-        _currentPos = Vector3.Lerp(_currentPos, _startPos, 5f * Time.deltaTime);
+        _currentPos = Vector3.Lerp(_currentPos, _startPos, 2f * Time.deltaTime);
     }    
 
     public virtual void TryShoot()
@@ -150,13 +153,11 @@ public abstract class WeaponBase : NetworkBehaviour
 
     public virtual void BulletSpawn()
     {
-        Vector3 targetDir = _camera.transform.forward;
-        targetDir += CastSingleRay();
-        targetDir.Normalize();
-        Vector3 rayStartOrigin = _camera.transform.position + _camera.transform.forward;
+        Vector3 rayStartOrigin = transform.position;
 
         RaycastHit hit;
-        Ray ray = new Ray(rayStartOrigin, targetDir);
+        Ray rayDir = _camera.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
+        Ray ray = new Ray(rayStartOrigin, (rayDir.direction + CastSingleRay()).normalized);
 
         if (Physics.Raycast(ray, out hit) && hit.collider.gameObject != null)
         {
@@ -188,9 +189,11 @@ public abstract class WeaponBase : NetworkBehaviour
     {
         if (Input.GetMouseButton(1))
         {
-            _targetPos = Vector3.Lerp(_targetPos, _aimingPos, 5f * Time.deltaTime);
-            _targetRot = Vector3.Lerp(_targetRot, _aimingRot, 5f * Time.deltaTime);
+            _targetPos = Vector3.Lerp(_targetPos, _aimingPos, 10f * Time.deltaTime);
+            _targetRot = Vector3.Lerp(_targetRot, _aimingRot, 10f * Time.deltaTime);
             _targetFOV = Mathf.Lerp(_targetFOV, _aimingFOV, _aimingSpeed * Time.deltaTime);
+            _aimingSpreadMultiplierX *= _aimingForceVisualRecoil;
+            _aimingSpreadMultiplierY *= _aimingForceVisualRecoil;
             _isAiming = true;
         }
         else
@@ -198,8 +201,6 @@ public abstract class WeaponBase : NetworkBehaviour
             _targetPos = Vector3.Lerp(_targetPos, _startPos, 5f * Time.deltaTime);
             _targetRot = Vector3.Lerp(_targetRot, _startRot, 5f * Time.deltaTime);
             _targetFOV = Mathf.Lerp(_targetFOV, _startFOV, _aimingSpeed * Time.deltaTime);
-            _spreadMultiplierX = 1f;
-            _spreadMultiplierY = 1f;
             _isAiming = false;
         }
 
@@ -223,12 +224,12 @@ public abstract class WeaponBase : NetworkBehaviour
         if (_cameraController != null && _isAiming)
         {
             _cameraController.AddRecoilCamera(randomVertical * _aimingSpreadMultiplierY, randomHorizontal * _aimingSpreadMultiplierX);
-            _currentPos.z += _forceRecoilPos * (_aimingSpreadMultiplierX * _spreadMultiplierY);
+            _currentPos.z = Mathf.Lerp(_currentPos.z, _forceRecoilPos * (_aimingForceVisualRecoil * 0.5f), 100f * Time.deltaTime);
         }
         else
         {
             _cameraController.AddRecoilCamera(randomVertical, randomHorizontal);
-            _currentPos.z += _forceRecoilPos;
+            _currentPos.z = Mathf.Lerp(_currentPos.z, _forceRecoilPos, 100f * Time.deltaTime);
         }
     }
 
