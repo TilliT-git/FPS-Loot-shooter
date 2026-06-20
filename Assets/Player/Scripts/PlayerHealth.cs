@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class PlayerHealth : NetworkBehaviour
 {
-    [SerializeField] protected float _maxHealth;
+    private PlayerStats _playerStats;
+
+    private float _maxHealth;
     public float MaxHealth => _maxHealth;
 
     [SyncVar(hook = nameof(OnHealthChangedHook))]
@@ -12,6 +14,13 @@ public class PlayerHealth : NetworkBehaviour
     public float CurrentHealth => _currentHealth;
 
     public Action <float, float> onHealthChange;
+
+    private void Start()
+    {
+        _playerStats = GetComponent<PlayerStats>();
+
+        _maxHealth = _playerStats.MaxHealth;
+    }
 
     public override void OnStartServer()
     {

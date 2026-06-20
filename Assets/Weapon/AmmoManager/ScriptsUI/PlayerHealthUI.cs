@@ -1,12 +1,11 @@
-using TMPro;
 using UnityEngine;
 
 public class PlayerHealthUI : MonoBehaviour
 {
     private RectTransform _rectTransform;
-    [SerializeField] private float _speedHealthBarAnim;
-
     private PlayerHealth _playerHealth;
+
+    [SerializeField] private float _speedHealthBarAnim;
 
     private Vector2 _targetScale;
 

@@ -1,22 +1,22 @@
-using Cinemachine;
 using Mirror;
 using UnityEngine;
 
 public class PlayerController : NetworkBehaviour
 {
     private CharacterController _characterController;
+    private PlayerStats _playerStats;
 
     [SerializeField] private Camera _mainCamera;
-    private CinemachineVirtualCamera _virtualCamera;
 
-    [SerializeField] private float _speed;
-    [SerializeField] private float _jumpForce;
     [SerializeField] private float _gravity;
 
     private float _currentVerticalVelocity;
 
     private float _horizontalInput;
     private float _verticalInput;
+
+    private bool _isSprint;
+    public bool IsSprint => _isSprint;
 
     private void Start()
     {
@@ -34,6 +34,7 @@ public class PlayerController : NetworkBehaviour
         Cursor.lockState = CursorLockMode.Locked;
 
         _characterController = GetComponent<CharacterController>();
+        _playerStats = GetComponent<PlayerStats>();
     }
 
     private void Update()
@@ -42,6 +43,15 @@ public class PlayerController : NetworkBehaviour
         _verticalInput = Input.GetAxis("Vertical");
 
         if (_characterController.isGrounded && Input.GetKeyDown(KeyCode.Space)) Jump();
+
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            _isSprint = true;
+        }
+        else
+        {
+            _isSprint = false;
+        }
     }
 
     private void FixedUpdate()
@@ -65,12 +75,12 @@ public class PlayerController : NetworkBehaviour
 
         Vector3 velocityY = new Vector3(0f, _currentVerticalVelocity, 0f);
         Vector3 finalMove = (horizontalMove + verticalMove).normalized;
-        _characterController.Move(((finalMove * _speed) + velocityY) * Time.deltaTime);
+        _characterController.Move(((finalMove * _playerStats.CurrentMoveSpeed) + velocityY) * Time.deltaTime);
     }
 
     private void Jump()
     {
-        _currentVerticalVelocity = Mathf.Sqrt(_jumpForce * -2f * _gravity);
+        _currentVerticalVelocity = Mathf.Sqrt(_playerStats.JumpForce * -2f * _gravity);
         Vector3 velocityY = new Vector3(0f, _currentVerticalVelocity, 0f);
         _characterController.Move(velocityY * Time.deltaTime);
     }
