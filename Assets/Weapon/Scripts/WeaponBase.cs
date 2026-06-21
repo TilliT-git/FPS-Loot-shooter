@@ -4,53 +4,25 @@ using UnityEngine;
 
 public abstract class WeaponBase : NetworkBehaviour
 {
-    public AmmoManager _ammoManager;
+    [SerializeField] public WeaponData weaponData;
+
+    private AmmoManager _ammoManager;
     private Camera _camera;
     private CameraController _cameraController;
 
     private PlayerStats _playerStats;
 
-    [SerializeField] protected GameObject _decal;
-
-    [SerializeField] public float walkSpeedMultiplier = 0.5f;
-    [SerializeField] public float aimSpeedMultiplier = 5f;
-
-    [SerializeField] protected float _aimingFOV;
-    [SerializeField] protected float _swayAmount;
-    [SerializeField] protected float _maxSwayAmount;
-    [SerializeField] protected float _swaySmoothing;
-    [SerializeField] protected float _tiltAmount;
-    [SerializeField] protected float _maxTiltAmount;
-    [SerializeField] protected float _tiltSmoothing;
-    [SerializeField] private float _forceVisualRecoil;
-    [SerializeField] private float _aimingForceVisualRecoil;
-
-    [SerializeField] protected float _forceRecoilPos;
-    [SerializeField] protected float _forceRecoilVerticalRot;
-    [SerializeField] protected float _forceRecoilHorizontalRot;
-    [SerializeField] protected float _fireRate;
-    [SerializeField] protected float _damageAmount;
-    [SerializeField] protected float _maxDistance;
-    [SerializeField] protected float _spreadMultiplierX;
-    [SerializeField] protected float _spreadMultiplierY;
-    [SerializeField] protected float _aimingSpreadMultiplierX;
-    [SerializeField] protected float _aimingSpreadMultiplierY;
-    [SerializeField] protected float _aimingSpeed;
-
     private float _fireRateTimer;
-
+    private float _startFOV = 60f;
     private Vector3 _startPos;
     private Vector3 _currentPos;
-    [SerializeField] private Vector3 _aimingPos;
 
     private Vector3 _startRot;
     private Vector3 _currentRot;
-    [SerializeField] private Vector3 _aimingRot;
 
     private Vector3 _targetPos;
     private Vector3 _targetRot;
 
-    private float _startFOV = 60f;
     private float _targetFOV;
 
     private Vector3 _swayPos;
@@ -90,11 +62,11 @@ private void Start()
 
         if (_isAiming)
         {
-            transform.localRotation = Quaternion.Euler(_targetRot + (_currentRot * _aimingForceVisualRecoil) + _swayRot);
+            transform.localRotation = Quaternion.Euler(_targetRot + (_currentRot * weaponData.AimingForceVisualRecoil) + _swayRot);
         }
         else
         {
-            transform.localRotation = Quaternion.Euler(_targetRot + (_currentRot * _forceVisualRecoil) + _swayRot);
+            transform.localRotation = Quaternion.Euler(_targetRot + (_currentRot * weaponData.ForceVisualRecoil) + _swayRot);
         }
     }
 
@@ -109,18 +81,18 @@ private void Start()
         float mouseX = Input.GetAxis("Mouse X");
         float mouseY = Input.GetAxis("Mouse Y");
 
-        float swayX = -mouseX * _swayAmount;
-        float swayY = -mouseY * _swayAmount;
+        float swayX = -mouseX * weaponData.SwayAmount;
+        float swayY = -mouseY * weaponData.SwayAmount;
 
         Vector3 targetSway = new Vector3(swayX, swayY, 0f);
-        _swayPos = Vector3.Lerp(_swayPos, targetSway, _swaySmoothing * Time.deltaTime);
+        _swayPos = Vector3.Lerp(_swayPos, targetSway, weaponData.SwaySmoothing * Time.deltaTime);
 
-        float tiltX = mouseY * _tiltAmount;
-        float tiltY = -mouseX * _tiltAmount;
-        float tiltZ = -mouseX * _tiltAmount * 0.5f;
+        float tiltX = mouseY * weaponData.TiltAmount;
+        float tiltY = -mouseX * weaponData.TiltAmount;
+        float tiltZ = -mouseX * weaponData.TiltAmount * 0.5f;
 
         Vector3 targetTilt = new Vector3(tiltX, tiltY, tiltZ);
-        _swayRot = Vector3.Lerp(_swayRot, targetTilt, _tiltSmoothing * Time.deltaTime);
+        _swayRot = Vector3.Lerp(_swayRot, targetTilt, weaponData.TiltSmoothing * Time.deltaTime);
     }
 
     private void VisualRecoil()
@@ -139,7 +111,7 @@ private void Start()
 
     public virtual void TryShoot()
     {
-        _fireRateTimer = _fireRate;
+        _fireRateTimer = weaponData.FireRate;
         Recoil();
         BulletSpawn();
         onShoot?.Invoke();
@@ -149,8 +121,8 @@ private void Start()
     {
         Vector2 randomPoint = UnityEngine.Random.insideUnitCircle;
 
-        float spreadX = randomPoint.x * _spreadMultiplierX * _aimingSpreadMultiplierX;
-        float spreadY = randomPoint.y * _spreadMultiplierY * _aimingSpreadMultiplierY;
+        float spreadX = randomPoint.x * weaponData.SpreadMultiplierX * weaponData.AimingSpreadMultiplierX;
+        float spreadY = randomPoint.y * weaponData.AimingSpreadMultiplierY * weaponData.AimingSpreadMultiplierY;
 
         Vector3 spreadDir = new Vector3(spreadY, spreadX, 0f);
 
@@ -168,7 +140,7 @@ private void Start()
 
         Ray cameraRay = _camera.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
 
-        Vector3 targetPoint = cameraRay.GetPoint(_maxDistance);
+        Vector3 targetPoint = cameraRay.GetPoint(weaponData.MaxDistance);
 
         if (Physics.Raycast(cameraRay, out RaycastHit hit) && hit.collider.gameObject != null)
         {
@@ -182,12 +154,12 @@ private void Start()
 
             if (playerHealth != null)
             {
-                CmdDamage(playerHealth, _damageAmount);
+                CmdDamage(playerHealth, weaponData.DamageAmount);
             }
 
             Vector3 decalPos = hit.point + (hit.normal * 0.001f);
             Quaternion decalRot = Quaternion.LookRotation(-hit.normal);
-            GameObject decal = Instantiate(_decal, decalPos, decalRot);
+            GameObject decal = Instantiate(weaponData.DecalPrefab, decalPos, decalRot);
             decal.transform.SetParent(hit.collider.transform);
             Debug.Log($"POPAL B: {hit.collider.name}");
         }
@@ -206,16 +178,16 @@ private void Start()
     {
         if (Input.GetMouseButton(1))
         {
-            _targetPos = Vector3.Lerp(_targetPos, _aimingPos, 10f * Time.deltaTime);
-            _targetRot = Vector3.Lerp(_targetRot, _aimingRot, 10f * Time.deltaTime);
-            _targetFOV = Mathf.Lerp(_targetFOV, _aimingFOV, _aimingSpeed * Time.deltaTime);
+            _targetPos = Vector3.Lerp(_targetPos, weaponData.AimingPos, 10f * Time.deltaTime);
+            _targetRot = Vector3.Lerp(_targetRot, weaponData.AimingRot, 10f * Time.deltaTime);
+            _targetFOV = Mathf.Lerp(_targetFOV, weaponData.AimingFOV, weaponData.AimingSpeed * Time.deltaTime);
             _isAiming = true;
         }
         else
         {
             _targetPos = Vector3.Lerp(_targetPos, _startPos, 5f * Time.deltaTime);
             _targetRot = Vector3.Lerp(_targetRot, _startRot, 5f * Time.deltaTime);
-            _targetFOV = Mathf.Lerp(_targetFOV, _startFOV, _aimingSpeed * Time.deltaTime);
+            _targetFOV = Mathf.Lerp(_targetFOV, _startFOV, weaponData.AimingSpeed * Time.deltaTime);
             _isAiming = false;
         }
         _camera.fieldOfView = _targetFOV;
@@ -229,21 +201,21 @@ private void Start()
 
     private void Recoil()
     {
-        float randomVertical = UnityEngine.Random.Range(0f, _forceRecoilVerticalRot);
+        float randomVertical = UnityEngine.Random.Range(0f, weaponData.ForceRecoilVerticalRot);
         _currentRot.x -= randomVertical;
 
-        float randomHorizontal = UnityEngine.Random.Range(-_forceRecoilHorizontalRot, _forceRecoilHorizontalRot);
+        float randomHorizontal = UnityEngine.Random.Range(-weaponData.ForceRecoilHorizontalRot, weaponData.ForceRecoilHorizontalRot);
         _currentRot.y += randomHorizontal;
 
         if (_cameraController != null && _isAiming)
         {
-            _cameraController.AddRecoilCamera(randomVertical * _aimingSpreadMultiplierY, randomHorizontal * _aimingSpreadMultiplierX);
-            _currentPos.z = Mathf.Lerp(_currentPos.z, _aimingForceVisualRecoil, 100f * Time.deltaTime);
+            _cameraController.AddRecoilCamera(randomVertical * weaponData.AimingSpreadMultiplierY, randomHorizontal * weaponData.AimingSpreadMultiplierX);
+            _currentPos.z = Mathf.Lerp(_currentPos.z, weaponData.ForceRecoilPos * weaponData.AimingForceVisualRecoil, 100f * Time.deltaTime);
         }
         else
         {
             _cameraController.AddRecoilCamera(randomVertical, randomHorizontal);
-            _currentPos.z = Mathf.Lerp(_currentPos.z, _forceRecoilPos, 100f * Time.deltaTime);
+            _currentPos.z = Mathf.Lerp(_currentPos.z, weaponData.ForceRecoilPos, 100f * Time.deltaTime);
         }
     }
 

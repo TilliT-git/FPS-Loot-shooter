@@ -1,25 +1,23 @@
 using Mirror;
 using System;
 using System.Collections;
-using TMPro;
 using UnityEngine;
 
 public class AmmoManager : NetworkBehaviour
 {
-    [SerializeField] protected int _maxAmmo;
-    [SerializeField] protected int _ammoInMag;
-    [SerializeField] protected float _reloadTime;
+    [SerializeField] private WeaponData _weaponData;
 
     private WeaponBase _weaponBase;
 
     [SyncVar(hook = nameof(OnCurrentAmmoChanged))]
-    private int _currentAmmo;
-    public int CurrentAmmo => _currentAmmo;
+    private int _currentAmmoInReserve;
+    public int CurrentAmmoInReserve => _currentAmmoInReserve;
 
     [SyncVar(hook = nameof(OnCurrentAmmoInMagChanged))]
     private int _currentAmmoInMag;
     public int CurrentAmmoInMag => _currentAmmoInMag;
 
+    [SyncVar]
     private bool _isReload;
     public bool IsReload => _isReload;
 
@@ -35,8 +33,8 @@ public class AmmoManager : NetworkBehaviour
     public override void OnStartServer()
     {
         base.OnStartServer();
-        _currentAmmo = _maxAmmo;
-        _currentAmmoInMag = _ammoInMag;
+        _currentAmmoInReserve = _weaponData.MaxAmmoInReserve;
+        _currentAmmoInMag = _weaponData.MaxAmmoInMag;
     }
 
     public override void OnStartClient()
@@ -68,6 +66,7 @@ public class AmmoManager : NetworkBehaviour
 
     private void RemoveAmmo()
     {
+        if (_currentAmmoInMag <= 0 || _isReload) return;
         CmdRemoveAmmo();
     }
 
@@ -86,7 +85,7 @@ public class AmmoManager : NetworkBehaviour
 
     private void StartReload()
     {
-        if (_currentAmmoInMag < _ammoInMag && CurrentAmmo > 0 && !_isReload)
+        if (_currentAmmoInMag < _weaponData.MaxAmmoInMag && _currentAmmoInReserve > 0 && !_isReload)
         {
             CmdStartReload();
         }
@@ -95,7 +94,7 @@ public class AmmoManager : NetworkBehaviour
     [Command]
     private void CmdStartReload()
     {
-        if (_currentAmmoInMag < _ammoInMag && CurrentAmmo > 0 && !_isReload)
+        if (_currentAmmoInMag < _weaponData.MaxAmmoInMag && _currentAmmoInReserve > 0 && !_isReload)
         {
             _reloadCoroutine = StartCoroutine(Reload());
         }
@@ -107,19 +106,19 @@ public class AmmoManager : NetworkBehaviour
 
         _isReload = true;
 
-        yield return new WaitForSeconds(_reloadTime);
+        yield return new WaitForSeconds(_weaponData.ReloadTime);
 
-        int ammoNeeded = _ammoInMag - _currentAmmoInMag;
+        int ammoNeeded = _weaponData.MaxAmmoInMag - _currentAmmoInMag;
 
-        if (_currentAmmo > ammoNeeded)
+        if (_currentAmmoInReserve > ammoNeeded)
         {
-            _currentAmmo -= ammoNeeded;
+            _currentAmmoInReserve -= ammoNeeded;
             _currentAmmoInMag += ammoNeeded;
         }
         else
         {
-            _currentAmmoInMag += CurrentAmmo;
-            _currentAmmo = 0;
+            _currentAmmoInMag += _currentAmmoInReserve;
+            _currentAmmoInReserve = 0;
         }
 
         _isReload = false;
@@ -132,7 +131,7 @@ public class AmmoManager : NetworkBehaviour
     {
         if (isLocalPlayer)
         {
-            onAmmoChanged?.Invoke(_currentAmmoInMag, _currentAmmo);
+            onAmmoChanged?.Invoke(_currentAmmoInMag, _currentAmmoInReserve);
         }
     }
 }

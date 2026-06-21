@@ -43,7 +43,7 @@ public class AmmoUI : MonoBehaviour
         if (_ammoManager != null)
         {
             _ammoManager.onAmmoChanged += UpdateAmmoUI;
-            UpdateAmmoUI(_ammoManager.CurrentAmmoInMag, _ammoManager.CurrentAmmo);
+            UpdateAmmoUI(_ammoManager.CurrentAmmoInMag, _ammoManager.CurrentAmmoInReserve);
         }
     }
 

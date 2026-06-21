@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964b6b8d4833e1f4f8020fd65c917c2a, type: 3}
+  m_Name: newWeapon
+  m_EditorClassIdentifier: 
+  _decalPrefab: {fileID: 1165599311015466669, guid: b095b3251af25b54796e7a43b4794e53, type: 3}
+  _forceRecoilPos: -0.25
+  _forceVisualRecoil: 1
+  _swayAmount: 0.05
+  _maxSwayAmount: 3
+  _swaySmoothing: 5
+  _tiltAmount: 1
+  _maxTiltAmount: 5
+  _tiltSmoothing: 5
+  _aimingFOV: 20
+  _aimingSpeed: 5
+  _aimingForceVisualRecoil: 0.5
+  _walkSpeedMultiplier: 0.75
+  _aimSpeedMultiplier: 0.5
+  _maxAmmoInReserve: 500
+  _maxAmmoInMag: 50
+  _reloadTime: 1.2
+  _fireRate: 0.15
+  _damageAmount: 10
+  _maxDistance: 100
+  _forceRecoilVerticalRot: 6
+  _forceRecoilHorizontalRot: 1
+  _spreadMultiplierX: 0
+  _spreadMultiplierY: 0
+  _aimingSpreadMultiplierX: 0
+  _aimingSpreadMultiplierY: 0
+  _aimingPos: {x: -0.45, y: 0.14, z: -0.15}
+  _aimingRot: {x: 0, y: 0, z: 0}
