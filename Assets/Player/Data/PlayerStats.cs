@@ -1,13 +1,17 @@
+using Mirror;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerStats : MonoBehaviour
+public class PlayerStats : NetworkBehaviour
 {
     [SerializeField] private PlayerData _playerData;
 
     private PlayerController _playerController;
     private WeaponChanger _weaponChanger;
     private WeaponBase _currentWeapon;
+
+    [SyncVar(hook = nameof(OnWeaponIndexChanged))]
+    private int _currentWeaponIndex;
 
     public float MaxHealth => _playerData != null ? _playerData.MaxHealth : 100f;
     public float MoveSpeed => _playerData != null ? _playerData.MoveSpeed : 1f;
@@ -44,7 +48,31 @@ public class PlayerStats : MonoBehaviour
 
     private void HandleWeaponChanged(List<GameObject> weapons, int index)
     {
-        _currentWeapon = weapons[index].GetComponentInChildren<WeaponBase>();
+        if (isLocalPlayer)
+        {
+            CmdUpdateWeaponIndex(index);
+        }
+    }
+
+    [Command]
+    private void CmdUpdateWeaponIndex(int index)
+    {
+        _currentWeaponIndex = index;
+    }
+
+    private void OnWeaponIndexChanged(int oldIndex, int newIndex)
+    {
+        _currentWeaponIndex = newIndex;
+
+        UpdateCurrentWeaponReference();
+    }
+
+    private void UpdateCurrentWeaponReference()
+    {
+        if (_weaponChanger != null && _weaponChanger.Weapons != null && _currentWeaponIndex < _weaponChanger.Weapons.Count)
+        {
+            _currentWeapon = _weaponChanger.Weapons[_currentWeaponIndex].GetComponentInChildren<WeaponBase>();
+        }
     }
 
     public float CurrentMoveSpeed

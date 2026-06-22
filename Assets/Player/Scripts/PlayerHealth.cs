@@ -11,11 +11,10 @@ public class PlayerHealth : NetworkBehaviour
     private float _maxHealth;
     public float MaxHealth => _maxHealth;
 
-    [SyncVar(hook = nameof(OnHealthChangedHook))]
     private float _currentHealth;
     public float CurrentHealth => _currentHealth;
 
-    [SyncVar]
+    [SyncVar(hook = nameof(OnDeathStatusChangedHook))]
     private bool _isDeath = false;
     public bool IsDeath => _isDeath;
 
@@ -23,8 +22,9 @@ public class PlayerHealth : NetworkBehaviour
     [SerializeField] private float _respawnDelay = 3f;
 
     public Action <float, float> onHealthChange;
+    public Action onDeath;
 
-    private void Awake()
+    private void Start()
     {
         _playerStats = GetComponent<PlayerStats>();
         _characterController = GetComponent<CharacterController>();
@@ -41,16 +41,20 @@ public class PlayerHealth : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
+        _currentHealth = _maxHealth;
         HealthChange(_currentHealth, _maxHealth);
     }
 
-    private void OnHealthChangedHook(float oldHealth, float newHealth)
+    private void OnDeathStatusChangedHook(bool oldStatus, bool newStatus)
     {
-        HealthChange(newHealth, _maxHealth);
+        if (newStatus)
+        {
+            onDeath?.Invoke();
+        }
     }
 
     [Server]
-    public void TakeDamage(float damageAmount)
+    public void TakeDamage(float damageAmount, GameObject attacker)
     {
         if (_isDeath) return;
 
@@ -59,13 +63,34 @@ public class PlayerHealth : NetworkBehaviour
         if (_currentHealth <= 0f)
         {
             _currentHealth = 0f;
-            ServarDeath();
+            ServerDeath(attacker);
         }
+
+        RpcSyncHealthFromServer(_currentHealth, _maxHealth);
+    }
+
+    [ClientRpc]
+    private void RpcSyncHealthFromServer(float newHealth, float maxHealth)
+    {
+        _currentHealth = newHealth;
+        HealthChange(newHealth, maxHealth);
     }
 
     [Server]
-    private void ServarDeath()
+    private void ServerDeath(GameObject attacker)
     {
+        _isDeath = true;
+
+        if (_playerStats != null) Debug.Log("ADD DEATH");
+
+        if (attacker != null && attacker != gameObject)
+        {
+            if (attacker.TryGetComponent<PlayerStats>(out var attakerStats))
+            {
+                Debug.Log("ADD KILL");
+            }
+        }
+
         StartCoroutine(RespawnSequence());
     }
 
@@ -74,14 +99,16 @@ public class PlayerHealth : NetworkBehaviour
     {
         RpcTogglePlayerState(false);
 
+        yield return new WaitForSeconds(_respawnDelay);
+
         if (NetworkManager.startPositions.Count > 0)
         {
             Transform randomSpawnPoint = NetworkManager.startPositions[UnityEngine.Random.Range(0, NetworkManager.startPositions.Count)];
 
-            RcpTeleport(randomSpawnPoint.position, randomSpawnPoint.rotation);
+            RpcTeleport(randomSpawnPoint.position, randomSpawnPoint.rotation);
         }
 
-        yield return new WaitForSeconds(_respawnDelay);
+        yield return null;
 
         _currentHealth = _maxHealth;
         _isDeath = false;
@@ -95,12 +122,10 @@ public class PlayerHealth : NetworkBehaviour
         if (_characterController != null) _characterController.enabled = isAlive;
 
         if (_playerModel != null) _playerModel.SetActive(isAlive);
-
-        if (_playerModel.GetComponent<Collider>() != null) _playerModel.GetComponent<Collider>().enabled = isAlive;
     }
 
     [ClientRpc]
-    private void RcpTeleport(Vector3 newPos, Quaternion newRot)
+    private void RpcTeleport(Vector3 newPos, Quaternion newRot)
     {
         if (_characterController != null) _characterController.enabled = false;
 

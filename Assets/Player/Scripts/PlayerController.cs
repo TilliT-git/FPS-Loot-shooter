@@ -39,6 +39,9 @@ public class PlayerController : NetworkBehaviour
 
     private void Update()
     {
+        if (!isLocalPlayer) return;
+        if (_characterController == null || !_characterController.enabled) return;
+
         _horizontalInput = Input.GetAxis("Horizontal");
         _verticalInput = Input.GetAxis("Vertical");
 
@@ -56,11 +59,16 @@ public class PlayerController : NetworkBehaviour
 
     private void FixedUpdate()
     {
+        if (!isLocalPlayer) return;
+        if (_characterController == null || !_characterController.enabled) return;
+
         Movement();
     }
 
     private void Movement()
     {
+        if (!_characterController.enabled) return;
+
         Vector3 horizontalMove = transform.right * _horizontalInput;
         Vector3 verticalMove = transform.forward * _verticalInput;
 
@@ -80,6 +88,8 @@ public class PlayerController : NetworkBehaviour
 
     private void Jump()
     {
+        if (!_characterController.enabled) return;
+
         _currentVerticalVelocity = Mathf.Sqrt(_playerStats.JumpForce * -2f * _gravity);
         Vector3 velocityY = new Vector3(0f, _currentVerticalVelocity, 0f);
         _characterController.Move(velocityY * Time.deltaTime);

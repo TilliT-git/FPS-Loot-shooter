@@ -9,8 +9,8 @@ public class Rifle : WeaponBase
         if (Input.GetMouseButton(0) && CanShoot()) TryShoot();
     }
 
-    public override void BulletSpawn()
+    public void BulletSpawn()
     {
-        base.BulletSpawn();
+        
     }
 }

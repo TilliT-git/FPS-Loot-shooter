@@ -8,6 +8,7 @@ public class WeaponChanger : NetworkBehaviour
 {
     [SerializeField] private float _timeChangeWeapon;
     [SerializeField] private List<GameObject> _weapons;
+    public List<GameObject> Weapons => _weapons;
 
     [SyncVar(hook = nameof(OnWeaponIndexChanged))]
     private int _currentWeapon = 0;

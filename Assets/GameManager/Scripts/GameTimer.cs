@@ -1,15 +1,17 @@
+using Mirror;
 using TMPro;
 using UnityEngine;
 
-public class GameTimer : MonoBehaviour
+public class GameTimer : NetworkBehaviour
 {
     [SerializeField] private float _timeRemaining;
     [SerializeField] private TextMeshProUGUI _timerText;
 
     private bool _isTimerRunning = false;
 
-    private void Start()
+    public override void OnStartServer()
     {
+        base.OnStartServer();
         _isTimerRunning = true;
     }
 

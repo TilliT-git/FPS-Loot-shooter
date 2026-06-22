@@ -36,7 +36,7 @@ MonoBehaviour:
   _forceRecoilHorizontalRot: 1
   _spreadMultiplierX: 0
   _spreadMultiplierY: 0
-  _aimingSpreadMultiplierX: 0
-  _aimingSpreadMultiplierY: 0
+  _aimingSpreadMultiplierX: 0.15
+  _aimingSpreadMultiplierY: 0.15
   _aimingPos: {x: -0.45, y: 0.14, z: -0.15}
   _aimingRot: {x: 0, y: 0, z: 0}

@@ -34,19 +34,12 @@ public abstract class WeaponBase : NetworkBehaviour
     public Action onShoot;
     public Action onReload;
 
-private void Start()
+    private void Start()
     {
         _ammoManager = GetComponent<AmmoManager>();
-        _camera = GetComponentInParent<Camera>();
         _cameraController = GetComponentInParent<CameraController>();
         _playerStats = GetComponentInParent<PlayerStats>();
-
-        if (!isLocalPlayer) return;
-
-        _startPos = transform.localPosition;
-        _startRot = transform.localEulerAngles;
-        _targetPos = _startPos;
-        _targetRot = _startRot;
+        _camera = GetComponentInParent<Camera>();
     }
 
     private void Update()
@@ -113,7 +106,13 @@ private void Start()
     {
         _fireRateTimer = weaponData.FireRate;
         Recoil();
-        BulletSpawn();
+
+        Vector3 rayOrigin = _camera.transform.position;
+        Vector3 rayDirection = _camera.transform.forward;
+
+        rayDirection += CastSingleRay();
+
+        CmdShoot(rayOrigin, rayDirection);
         onShoot?.Invoke();
     }
 
@@ -134,43 +133,38 @@ private void Start()
         return !_ammoManager.IsReload && _ammoManager.CurrentAmmoInMag > 0 && _fireRateTimer <= 0;
     }
 
-    public virtual void BulletSpawn()
+    [Command]
+    private void CmdShoot(Vector3 origin, Vector3 direction)
     {
-        Vector3 gunPosition = transform.position;
+        GameObject attacker = connectionToClient.identity.gameObject;
 
-        Ray cameraRay = _camera.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
-
-        Vector3 targetPoint = cameraRay.GetPoint(weaponData.MaxDistance);
-
-        if (Physics.Raycast(cameraRay, out RaycastHit hit) && hit.collider.gameObject != null)
+        if (Physics.Raycast(origin, direction, out RaycastHit hit))
         {
-            targetPoint = hit.point;
-
-            Vector3 bulletDirection = (targetPoint - transform.position).normalized;
-
-            Ray ray = new Ray(gunPosition, bulletDirection);
-
-            PlayerHealth playerHealth = hit.collider.gameObject.GetComponent<PlayerHealth>();
-
-            if (playerHealth != null)
+            if (hit.collider.TryGetComponent<PlayerHealth>(out PlayerHealth targetHealth))
             {
-                CmdDamage(playerHealth, weaponData.DamageAmount);
-            }
+                if (targetHealth.gameObject == attacker) return;
 
-            Vector3 decalPos = hit.point + (hit.normal * 0.001f);
-            Quaternion decalRot = Quaternion.LookRotation(-hit.normal);
-            GameObject decal = Instantiate(weaponData.DecalPrefab, decalPos, decalRot);
-            decal.transform.SetParent(hit.collider.transform);
-            Debug.Log($"POPAL B: {hit.collider.name}");
+                targetHealth.TakeDamage(weaponData.DamageAmount, attacker);
+            }
+            
+            NetworkIdentity hitIdentity = hit.collider.GetComponent<NetworkIdentity>();
+            GameObject objectToSend = (hitIdentity != null) ? hit.collider.gameObject : null;
+
+            RpcSpawnDecal(hit.point, hit.normal, objectToSend);
         }
     }
 
-    [Command]
-    private void CmdDamage(PlayerHealth playerHealth, float damageAmount)
+    [ClientRpc]
+    private void RpcSpawnDecal(Vector3 point, Vector3 normal, GameObject hitObject)
     {
-        if (playerHealth != null)
+        Vector3 decalPos = point + (normal * 0.001f);
+        Quaternion decalRot = Quaternion.LookRotation(-normal);
+
+        GameObject decal = Instantiate(weaponData.DecalPrefab, decalPos, decalRot);
+
+        if (hitObject != null)
         {
-            playerHealth.TakeDamage(damageAmount);
+            decal.transform.SetParent(hitObject.transform);
         }
     }
 
@@ -192,7 +186,6 @@ private void Start()
         }
         _camera.fieldOfView = _targetFOV;
     }
-
 
     private void ShotDelay()
     {
