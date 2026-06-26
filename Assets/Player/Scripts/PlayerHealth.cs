@@ -7,6 +7,7 @@ public class PlayerHealth : NetworkBehaviour
 {
     private PlayerStats _playerStats;
     private CharacterController _characterController;
+    private NetworkTransformReliable _networkTransform;
 
     private float _maxHealth;
     public float MaxHealth => _maxHealth;
@@ -24,10 +25,11 @@ public class PlayerHealth : NetworkBehaviour
     public Action <float, float> onHealthChange;
     public Action onDeath;
 
-    private void Start()
+    private void Awake()
     {
         _playerStats = GetComponent<PlayerStats>();
         _characterController = GetComponent<CharacterController>();
+        _networkTransform = GetComponent<NetworkTransformReliable>();
 
         _maxHealth = _playerStats.MaxHealth;
     }
@@ -43,10 +45,14 @@ public class PlayerHealth : NetworkBehaviour
         base.OnStartClient();
         _currentHealth = _maxHealth;
         HealthChange(_currentHealth, _maxHealth);
+
+        TogglePlayerState(!_isDeath);
     }
 
     private void OnDeathStatusChangedHook(bool oldStatus, bool newStatus)
     {
+        TogglePlayerState(!newStatus);
+
         if (newStatus)
         {
             onDeath?.Invoke();
@@ -97,42 +103,43 @@ public class PlayerHealth : NetworkBehaviour
     [Server]
     private IEnumerator RespawnSequence()
     {
-        RpcTogglePlayerState(false);
-
         yield return new WaitForSeconds(_respawnDelay);
+
+        Vector3 spawnPos = Vector3.zero;
+        Quaternion spawnRot = Quaternion.identity;
 
         if (NetworkManager.startPositions.Count > 0)
         {
             Transform randomSpawnPoint = NetworkManager.startPositions[UnityEngine.Random.Range(0, NetworkManager.startPositions.Count)];
-
-            RpcTeleport(randomSpawnPoint.position, randomSpawnPoint.rotation);
+            spawnPos = randomSpawnPoint.position;
+            spawnRot = randomSpawnPoint.rotation;
         }
 
-        yield return null;
+        if (_characterController != null) _characterController.enabled = false;
+
+        if (_networkTransform != null)
+        {
+            _networkTransform.ServerTeleport(spawnPos, spawnRot);
+        }
+        else
+        {
+            Debug.Log("NO  TELEPORT");
+        }
+
+        yield return new WaitForSeconds(0.1f);
 
         _currentHealth = _maxHealth;
         _isDeath = false;
+        
+        RpcSyncHealthFromServer(_currentHealth, _maxHealth);
 
-        RpcTogglePlayerState(true);
     }
 
-    [ClientRpc]
-    private void RpcTogglePlayerState(bool isAlive)
+    private void TogglePlayerState(bool isAlive)
     {
         if (_characterController != null) _characterController.enabled = isAlive;
 
         if (_playerModel != null) _playerModel.SetActive(isAlive);
-    }
-
-    [ClientRpc]
-    private void RpcTeleport(Vector3 newPos, Quaternion newRot)
-    {
-        if (_characterController != null) _characterController.enabled = false;
-
-        transform.position = newPos;
-        transform.rotation = newRot;
-
-        if (_characterController != null) _characterController.enabled = true;
     }
 
     private void HealthChange(float currentHealth, float maxHealth)

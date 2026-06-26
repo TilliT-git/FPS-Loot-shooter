@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class GameTimer : NetworkBehaviour
 {
+    [SyncVar(hook = nameof(OnTimeRemainingChanged))]
     [SerializeField] private float _timeRemaining;
     [SerializeField] private TextMeshProUGUI _timerText;
 
@@ -17,6 +18,8 @@ public class GameTimer : NetworkBehaviour
 
     private void Update()
     {
+        if (!isServer || !_isTimerRunning) return;
+
         if (_isTimerRunning)
         {
             if (_timeRemaining > 0)
@@ -31,6 +34,11 @@ public class GameTimer : NetworkBehaviour
                 OnTimerEnd();
             }
         }
+    }
+
+    private void OnTimeRemainingChanged(float oldTime, float newTime)
+    {
+        DisplayTime(newTime);
     }
 
     private void DisplayTime(float timeToDisplay)

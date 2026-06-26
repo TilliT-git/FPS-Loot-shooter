@@ -138,15 +138,23 @@ public abstract class WeaponBase : NetworkBehaviour
     {
         GameObject attacker = connectionToClient.identity.gameObject;
 
-        if (Physics.Raycast(origin, direction, out RaycastHit hit))
+        if (Physics.Raycast(origin, direction, out RaycastHit hit, weaponData.MaxDistance))
         {
-            if (hit.collider.TryGetComponent<PlayerHealth>(out PlayerHealth targetHealth))
-            {
-                if (targetHealth.gameObject == attacker) return;
+            PlayerController targetPlayer = hit.collider.GetComponentInParent<PlayerController>();
 
-                targetHealth.TakeDamage(weaponData.DamageAmount, attacker);
+            if (targetPlayer != null)
+            {
+                if (targetPlayer.gameObject == attacker) return;
+
+                PlayerHealth targetHealth = targetPlayer.GetComponent<PlayerHealth>();
+                if (targetHealth != null)
+                {
+                    targetHealth.TakeDamage(weaponData.DamageAmount, attacker);
+                }
+
+                return;
             }
-            
+
             NetworkIdentity hitIdentity = hit.collider.GetComponent<NetworkIdentity>();
             GameObject objectToSend = (hitIdentity != null) ? hit.collider.gameObject : null;
 
@@ -157,6 +165,10 @@ public abstract class WeaponBase : NetworkBehaviour
     [ClientRpc]
     private void RpcSpawnDecal(Vector3 point, Vector3 normal, GameObject hitObject)
     {
+        if (weaponData == null || weaponData.DecalPrefab == null) return;
+
+        if (hitObject != null && hitObject.GetComponentInParent<PlayerHealth>() != null) return;
+
         Vector3 decalPos = point + (normal * 0.001f);
         Quaternion decalRot = Quaternion.LookRotation(-normal);
 

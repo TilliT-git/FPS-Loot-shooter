@@ -46,6 +46,11 @@ public class PlayerStats : NetworkBehaviour
         }
     }
 
+    private void Start()
+    {
+        UpdateCurrentWeaponReference();
+    }
+
     private void HandleWeaponChanged(List<GameObject> weapons, int index)
     {
         if (isLocalPlayer)
@@ -58,6 +63,8 @@ public class PlayerStats : NetworkBehaviour
     private void CmdUpdateWeaponIndex(int index)
     {
         _currentWeaponIndex = index;
+
+        UpdateCurrentWeaponReference();
     }
 
     private void OnWeaponIndexChanged(int oldIndex, int newIndex)
