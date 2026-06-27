@@ -12,6 +12,7 @@ public class PlayerHealth : NetworkBehaviour
     private float _maxHealth;
     public float MaxHealth => _maxHealth;
 
+    [SyncVar(hook = nameof(OnHealthChangedHook))]
     private float _currentHealth;
     public float CurrentHealth => _currentHealth;
 
@@ -49,6 +50,14 @@ public class PlayerHealth : NetworkBehaviour
         TogglePlayerState(!_isDeath);
     }
 
+    private void OnHealthChangedHook(float oldHealth, float newHealth)
+    {
+        if (isLocalPlayer)
+        {
+            HealthChange(newHealth, _maxHealth);
+        }
+    }
+
     private void OnDeathStatusChangedHook(bool oldStatus, bool newStatus)
     {
         TogglePlayerState(!newStatus);
@@ -72,28 +81,28 @@ public class PlayerHealth : NetworkBehaviour
             ServerDeath(attacker);
         }
 
-        RpcSyncHealthFromServer(_currentHealth, _maxHealth);
+        //RpcSyncHealthFromServer(_currentHealth, _maxHealth);
     }
 
-    [ClientRpc]
-    private void RpcSyncHealthFromServer(float newHealth, float maxHealth)
-    {
-        _currentHealth = newHealth;
-        HealthChange(newHealth, maxHealth);
-    }
+    //[ClientRpc]
+    //private void RpcSyncHealthFromServer(float newHealth, float maxHealth)
+    //{
+    //    _currentHealth = newHealth;
+    //    HealthChange(newHealth, maxHealth);
+    //}
 
     [Server]
     private void ServerDeath(GameObject attacker)
     {
         _isDeath = true;
 
-        if (_playerStats != null) Debug.Log("ADD DEATH");
+        if (_playerStats != null) _playerStats.AddDeath();
 
         if (attacker != null && attacker != gameObject)
         {
             if (attacker.TryGetComponent<PlayerStats>(out var attakerStats))
             {
-                Debug.Log("ADD KILL");
+                attakerStats.AddKill();
             }
         }
 
@@ -131,8 +140,7 @@ public class PlayerHealth : NetworkBehaviour
         _currentHealth = _maxHealth;
         _isDeath = false;
         
-        RpcSyncHealthFromServer(_currentHealth, _maxHealth);
-
+        //RpcSyncHealthFromServer(_currentHealth, _maxHealth);
     }
 
     private void TogglePlayerState(bool isAlive)

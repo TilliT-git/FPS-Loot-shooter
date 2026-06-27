@@ -1916,10 +1916,6 @@ PrefabInstance:
       propertyPath: _timerText
       value: 
       objectReference: {fileID: 254283237}
-    - target: {fileID: 3289572208535776532, guid: 3a20b597f85e626408b43b58e2c33e13, type: 3}
-      propertyPath: syncDirection
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 6465254924930348776, guid: 3a20b597f85e626408b43b58e2c33e13, type: 3}
       propertyPath: m_Name
       value: GameManager

@@ -1,17 +1,28 @@
 using Mirror;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerStats : NetworkBehaviour
 {
     [SerializeField] private PlayerData _playerData;
+    [SerializeField] private GameManager _gameManager;
 
     private PlayerController _playerController;
     private WeaponChanger _weaponChanger;
     private WeaponBase _currentWeapon;
 
+    public Action <int, int> onPlayerStatsChange;
+    public static Action <PlayerStats> onPlayerMadeKill;
+
     [SyncVar(hook = nameof(OnWeaponIndexChanged))]
     private int _currentWeaponIndex;
+
+    [Header("Stats")]
+    [SyncVar(hook = nameof(OnKillsChanged))] private int _kills = 0;
+    [SyncVar(hook = nameof(OnDeathsChanged))] private int _deaths = 0;
+    public int Kills => _kills;
+    public int Deaths => _deaths;
 
     public float MaxHealth => _playerData != null ? _playerData.MaxHealth : 100f;
     public float MoveSpeed => _playerData != null ? _playerData.MoveSpeed : 1f;
@@ -79,6 +90,35 @@ public class PlayerStats : NetworkBehaviour
         if (_weaponChanger != null && _weaponChanger.Weapons != null && _currentWeaponIndex < _weaponChanger.Weapons.Count)
         {
             _currentWeapon = _weaponChanger.Weapons[_currentWeaponIndex].GetComponentInChildren<WeaponBase>();
+        }
+    }
+
+    [Server]
+    public void AddKill()
+    {
+        _kills++;
+
+        onPlayerMadeKill?.Invoke(this);
+    }
+
+    [Server]
+    public void AddDeath()
+    {
+        _deaths++;
+    }
+
+    private void OnKillsChanged(int oldVal, int newVal)
+    {
+        if (isLocalPlayer)
+        {
+            onPlayerStatsChange?.Invoke(newVal, _deaths);
+        }
+    }
+    private void OnDeathsChanged(int oldVal, int newVal)
+    {
+        if (isLocalPlayer)
+        {
+            onPlayerStatsChange?.Invoke(_kills, newVal);
         }
     }
 

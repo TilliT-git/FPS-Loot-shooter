@@ -422,7 +422,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1861e9b9f332245499196c7a041f8adf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 1
+  syncDirection: 0
   syncMode: 0
   syncInterval: 0
   _playerData: {fileID: 11400000, guid: c864ab9ddb9c0324dbba353dc8ded587, type: 2}
@@ -532,7 +532,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 701c04fa5d595224491bf8df1bbf2a61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 1
+  syncDirection: 0
   syncMode: 0
   syncInterval: 0
   _playerModel: {fileID: 7197418410035305306}

@@ -1,4 +1,5 @@
 using Mirror;
+using System;
 using TMPro;
 using UnityEngine;
 
@@ -6,9 +7,11 @@ public class GameTimer : NetworkBehaviour
 {
     [SyncVar(hook = nameof(OnTimeRemainingChanged))]
     [SerializeField] private float _timeRemaining;
+    public float TimeRemaining => _timeRemaining;
     [SerializeField] private TextMeshProUGUI _timerText;
 
     private bool _isTimerRunning = false;
+    public static Action onTimeOut;
 
     public override void OnStartServer()
     {
@@ -18,7 +21,7 @@ public class GameTimer : NetworkBehaviour
 
     private void Update()
     {
-        if (!isServer || !_isTimerRunning) return;
+        if (!isServer) return;
 
         if (_isTimerRunning)
         {
@@ -53,6 +56,6 @@ public class GameTimer : NetworkBehaviour
 
     private void OnTimerEnd()
     {
-        Debug.Log("TIME OUT");
+        onTimeOut?.Invoke();
     }
 }

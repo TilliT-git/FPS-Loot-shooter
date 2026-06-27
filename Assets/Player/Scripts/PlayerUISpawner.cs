@@ -26,5 +26,13 @@ public class PlayerUISpawner : NetworkBehaviour
         {
             healthUI.Initialize(health);
         }
+
+        PlayerStatisticsUI statisticsUI = uiInstance.GetComponentInChildren<PlayerStatisticsUI>();
+        PlayerStats stats = GetComponent<PlayerStats>();
+
+        if (statisticsUI != null && stats != null)
+        {
+            statisticsUI.Initialize(stats);
+        }
     }
 }
