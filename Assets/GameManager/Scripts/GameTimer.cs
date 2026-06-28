@@ -5,10 +5,11 @@ using UnityEngine;
 
 public class GameTimer : NetworkBehaviour
 {
-    [SyncVar(hook = nameof(OnTimeRemainingChanged))]
-    [SerializeField] private float _timeRemaining;
-    public float TimeRemaining => _timeRemaining;
+    [SerializeField] private float _startTimeRemaining;
     [SerializeField] private TextMeshProUGUI _timerText;
+
+    [SyncVar(hook = nameof(OnTimeRemainingChanged))]
+    private float _timeRemaining;
 
     private bool _isTimerRunning = false;
     public static Action onTimeOut;
@@ -17,6 +18,20 @@ public class GameTimer : NetworkBehaviour
     {
         base.OnStartServer();
         _isTimerRunning = true;
+    }
+
+    private void Awake()
+    {
+        _timeRemaining = _startTimeRemaining;
+
+        GameManager.onEndMatch += StopTimer;
+        GameManager.onStartMatch += SetTimer;
+    }
+
+    private void OnDestroy()
+    {
+        GameManager.onEndMatch -= StopTimer;
+        GameManager.onStartMatch -= SetTimer;
     }
 
     private void Update()
@@ -52,6 +67,21 @@ public class GameTimer : NetworkBehaviour
         float seconds = Mathf.FloorToInt(timeToDisplay % 60);
 
         _timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+    }
+
+    private void SetTimer()
+    {
+        if (!isServer) return;
+
+        _timeRemaining = _startTimeRemaining;
+        _isTimerRunning = true;
+    }
+
+    private void StopTimer()
+    {
+        if (!isServer) return;
+
+        _isTimerRunning = false;
     }
 
     private void OnTimerEnd()

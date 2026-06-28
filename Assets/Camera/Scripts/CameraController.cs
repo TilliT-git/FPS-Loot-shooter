@@ -18,8 +18,28 @@ public class CameraController : NetworkBehaviour
         if (!isLocalPlayer) return;
 
         _playerCamera = GetComponentInChildren<Camera>();
+    }
 
-        Cursor.lockState = CursorLockMode.Locked;
+    private void Awake()
+    {
+        GameManager.onEndMatch += DisabledComponent;
+        GameManager.onStartMatch += EnabledComponent;
+    }
+
+    private void OnDestroy()
+    {
+        GameManager.onEndMatch -= DisabledComponent;
+        GameManager.onStartMatch -= EnabledComponent;
+    }
+
+    private void DisabledComponent()
+    {
+        enabled = false;
+    }
+
+    private void EnabledComponent()
+    {
+        enabled = true;
     }
 
     private void Update()

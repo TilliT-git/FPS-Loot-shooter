@@ -426,6 +426,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   _playerData: {fileID: 11400000, guid: c864ab9ddb9c0324dbba353dc8ded587, type: 2}
+  _gameManager: {fileID: 0}
 --- !u!143 &1267900777047658651
 CharacterController:
   m_ObjectHideFlags: 0

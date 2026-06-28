@@ -1858,7 +1858,7 @@ Transform:
   m_GameObject: {fileID: 543416121}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
-  m_LocalPosition: {x: 0, y: 0.5, z: 13}
+  m_LocalPosition: {x: 0, y: 1, z: 13}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1912,10 +1912,26 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2016451350947934983, guid: 3a20b597f85e626408b43b58e2c33e13, type: 3}
+      propertyPath: _killsToWin
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3289572208535776532, guid: 3a20b597f85e626408b43b58e2c33e13, type: 3}
       propertyPath: _timerText
       value: 
       objectReference: {fileID: 254283237}
+    - target: {fileID: 3289572208535776532, guid: 3a20b597f85e626408b43b58e2c33e13, type: 3}
+      propertyPath: syncDirection
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3289572208535776532, guid: 3a20b597f85e626408b43b58e2c33e13, type: 3}
+      propertyPath: _timeRemaining
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3289572208535776532, guid: 3a20b597f85e626408b43b58e2c33e13, type: 3}
+      propertyPath: _startTimeRemaining
+      value: 300
+      objectReference: {fileID: 0}
     - target: {fileID: 6465254924930348776, guid: 3a20b597f85e626408b43b58e2c33e13, type: 3}
       propertyPath: m_Name
       value: GameManager
@@ -4487,7 +4503,7 @@ Transform:
   m_GameObject: {fileID: 1208098830}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: -13}
+  m_LocalPosition: {x: 0, y: 1, z: -13}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

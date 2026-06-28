@@ -23,6 +23,28 @@ public class WeaponChanger : NetworkBehaviour
         InitWeaponsVisibility();
     }
 
+    private void Awake()
+    {
+        GameManager.onEndMatch += DisabledComponent;
+        GameManager.onStartMatch += EnabledComponent;
+    }
+
+    private void OnDestroy()
+    {
+        GameManager.onEndMatch -= DisabledComponent;
+        GameManager.onStartMatch -= EnabledComponent;
+    }
+
+    private void DisabledComponent()
+    {
+        enabled = false;
+    }
+
+    private void EnabledComponent()
+    {
+        enabled = true;
+    }
+
     private void Update()
     {
         if (!isLocalPlayer) return;

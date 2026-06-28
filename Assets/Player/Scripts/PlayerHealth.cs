@@ -26,6 +26,8 @@ public class PlayerHealth : NetworkBehaviour
     public Action <float, float> onHealthChange;
     public Action onDeath;
 
+    Coroutine _respawnCoroutine;
+
     private void Awake()
     {
         _playerStats = GetComponent<PlayerStats>();
@@ -33,6 +35,13 @@ public class PlayerHealth : NetworkBehaviour
         _networkTransform = GetComponent<NetworkTransformReliable>();
 
         _maxHealth = _playerStats.MaxHealth;
+
+        GameManager.onStartMatch += StartMatchRespawn;
+    }
+
+    private void OnDestroy()
+    {
+        GameManager.onStartMatch -= StartMatchRespawn;
     }
 
     public override void OnStartServer()
@@ -80,16 +89,7 @@ public class PlayerHealth : NetworkBehaviour
             _currentHealth = 0f;
             ServerDeath(attacker);
         }
-
-        //RpcSyncHealthFromServer(_currentHealth, _maxHealth);
     }
-
-    //[ClientRpc]
-    //private void RpcSyncHealthFromServer(float newHealth, float maxHealth)
-    //{
-    //    _currentHealth = newHealth;
-    //    HealthChange(newHealth, maxHealth);
-    //}
 
     [Server]
     private void ServerDeath(GameObject attacker)
@@ -106,13 +106,32 @@ public class PlayerHealth : NetworkBehaviour
             }
         }
 
-        StartCoroutine(RespawnSequence());
+        Respawn();
     }
 
-    [Server]
-    private IEnumerator RespawnSequence()
+    private void Respawn()
     {
-        yield return new WaitForSeconds(_respawnDelay);
+        if (!isServer) return;
+
+        if (_respawnCoroutine == null)
+        {
+            StartCoroutine(RespawnSequence(_respawnDelay));
+        }
+    }
+
+    private void StartMatchRespawn()
+    {
+        if (!isServer) return;
+
+        if (_respawnCoroutine == null && _characterController.enabled)
+        {
+            StartCoroutine(RespawnSequence(0f));
+        }
+    }
+
+    private IEnumerator RespawnSequence(float respawnDelay)
+    {
+        yield return new WaitForSeconds(respawnDelay);
 
         Vector3 spawnPos = Vector3.zero;
         Quaternion spawnRot = Quaternion.identity;
@@ -124,23 +143,26 @@ public class PlayerHealth : NetworkBehaviour
             spawnRot = randomSpawnPoint.rotation;
         }
 
-        if (_characterController != null) _characterController.enabled = false;
+        RpcTeleportClient(spawnPos, spawnRot);
 
-        if (_networkTransform != null)
-        {
-            _networkTransform.ServerTeleport(spawnPos, spawnRot);
-        }
-        else
-        {
-            Debug.Log("NO  TELEPORT");
-        }
-
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.15f);
 
         _currentHealth = _maxHealth;
         _isDeath = false;
-        
-        //RpcSyncHealthFromServer(_currentHealth, _maxHealth);
+        _respawnCoroutine = null;
+    }
+
+    [ClientRpc]
+    private void RpcTeleportClient(Vector3 spawnPos, Quaternion spawnRot)
+    {
+        if (!isLocalPlayer) return;
+
+        if (_characterController != null) _characterController.enabled = false;
+
+        transform.position = spawnPos;
+        transform.rotation = spawnRot;
+
+        if (_characterController != null) _characterController.enabled = true;
     }
 
     private void TogglePlayerState(bool isAlive)

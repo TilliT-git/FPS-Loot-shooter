@@ -33,8 +33,32 @@ public class PlayerController : NetworkBehaviour
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
 
-        _characterController = GetComponent<CharacterController>();
         _playerStats = GetComponent<PlayerStats>();
+    }
+
+    private void Awake()
+    {
+        _characterController = GetComponent<CharacterController>();
+        GameManager.onEndMatch += DisabledComponent;
+        GameManager.onStartMatch += EnabledComponent;
+    }
+
+    private void OnDestroy()
+    {
+        GameManager.onEndMatch -= DisabledComponent;
+        GameManager.onStartMatch -= EnabledComponent;
+    }
+
+    private void DisabledComponent()
+    {
+        enabled = false;
+    }
+
+    private void EnabledComponent()
+    {
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+        enabled = true;
     }
 
     private void Update()
