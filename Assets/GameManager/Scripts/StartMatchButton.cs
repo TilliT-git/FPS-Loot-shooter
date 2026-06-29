@@ -1,8 +1,8 @@
+using Mirror;
 using System;
-using UnityEngine;
 using UnityEngine.UI;
 
-public class StartMatchButton : MonoBehaviour
+public class StartMatchButton : NetworkBehaviour
 {
     private Button _button;
 
@@ -11,7 +11,6 @@ public class StartMatchButton : MonoBehaviour
     private void Awake()
     {
         _button = GetComponent<Button>();
-
         _button.onClick.AddListener(HandleClick);
     }
 

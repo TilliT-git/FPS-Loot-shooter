@@ -49,8 +49,6 @@ public class GameManager : NetworkBehaviour
     [Server]
     private void EndMatch()
     {
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
         Debug.Log("TIMEOUT");
         onEndMatch?.Invoke();
         RpcNotifyClientsMatchEnded();

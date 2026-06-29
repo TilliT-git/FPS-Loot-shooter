@@ -18,47 +18,19 @@ public class PlayerController : NetworkBehaviour
     private bool _isSprint;
     public bool IsSprint => _isSprint;
 
+    private void Awake()
+    {
+        _characterController = GetComponent<CharacterController>();
+        _playerStats = GetComponent<PlayerStats>();
+    }
+
     private void Start()
     {
         if (!isLocalPlayer)
         {
-            this.enabled = false;
-
-            Camera playerCam = GetComponentInChildren<Camera>();
-            if (playerCam != null) playerCam.enabled = false;
-
+            enabled = false;
             return;
         }
-
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
-
-        _playerStats = GetComponent<PlayerStats>();
-    }
-
-    private void Awake()
-    {
-        _characterController = GetComponent<CharacterController>();
-        GameManager.onEndMatch += DisabledComponent;
-        GameManager.onStartMatch += EnabledComponent;
-    }
-
-    private void OnDestroy()
-    {
-        GameManager.onEndMatch -= DisabledComponent;
-        GameManager.onStartMatch -= EnabledComponent;
-    }
-
-    private void DisabledComponent()
-    {
-        enabled = false;
-    }
-
-    private void EnabledComponent()
-    {
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
-        enabled = true;
     }
 
     private void Update()

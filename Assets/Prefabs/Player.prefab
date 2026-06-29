@@ -387,6 +387,7 @@ GameObject:
   - component: {fileID: -2040426219918421367}
   - component: {fileID: -4872182992595241153}
   - component: {fileID: 2310245335767366890}
+  - component: {fileID: 5700565369229111809}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -571,6 +572,27 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   _uiCanvasPrefab: {fileID: 9013534821588842006, guid: e555b742d33a34944b65d34a0e2df238, type: 3}
+--- !u!114 &5700565369229111809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5471433730659023384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47c83352b1d227143bc53bb2051f430e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  _playerController: {fileID: 2620267595637791142}
+  _cameraController: {fileID: -4872182992595241153}
+  _weaponChanger: {fileID: 8734869626074296793}
+  _weapons:
+  - {fileID: 4361277200073351879}
+  - {fileID: 3443322804040620187}
 --- !u!1 &7197418410035305306
 GameObject:
   m_ObjectHideFlags: 0
