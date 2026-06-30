@@ -13,17 +13,22 @@ public class CameraController : NetworkBehaviour
     private Vector3 _targetRecoilRotation;
     private Vector3 _currentRecoilRotation;
 
+    private void Awake()
+    {
+        _playerCamera = GetComponentInChildren<Camera>();
+    }
+
     private void Start()
     {
-        if (!isLocalPlayer) return;
-
-        _playerCamera = GetComponentInChildren<Camera>();
+        if (!isLocalPlayer)
+        {
+            if (_playerCamera != null) _playerCamera.enabled = false;
+            return;
+        }
     }
 
     private void Update()
     {
-        if (!isLocalPlayer) return;
-
         CameraRotate();
     }
 

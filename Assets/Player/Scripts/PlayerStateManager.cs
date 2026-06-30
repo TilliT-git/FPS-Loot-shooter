@@ -1,19 +1,45 @@
 using Mirror;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerStateManager : NetworkBehaviour
 {
-    [SerializeField] private PlayerController _playerController;
-    [SerializeField] private CameraController _cameraController;
-    [SerializeField] private WeaponChanger _weaponChanger;
-    [SerializeField] private List<WeaponBase> _weapons; 
+    private CharacterController _characterController;
+    private PlayerController _playerController;
+    private CameraController _cameraController;
+    private WeaponChanger _weaponChanger;
+    [SerializeField] private GameObject _playerModel;
+    [SerializeField] private List<WeaponBase> _weapons;
+
+    [SyncVar(hook = nameof(OnDeathStatusChangedHook))]
+    private bool _isDeath = false;
+    public bool IsDeath => _isDeath;
+
+    private bool _isPaused = false;
+
+    public static bool IsControlsActive { get; private set; }
+
+    [Server]
+    public void SetDeathStatus(bool value) => _isDeath = value;
 
     private void Awake()
     {
+        _characterController = GetComponent<CharacterController>();
+        _playerController = GetComponent<PlayerController>();
+        _cameraController = GetComponent<CameraController>();
+        _weaponChanger = GetComponentInChildren<WeaponChanger>();
+
         ScreenManager.onPaused += HandlePause;
         GameManager.onStartMatch += MatchStarted;
         GameManager.onEndMatch += MatchEnded;
+    }
+
+    private void OnDestroy()
+    {
+        ScreenManager.onPaused -= HandlePause;
+        GameManager.onStartMatch -= MatchStarted;
+        GameManager.onEndMatch -= MatchEnded;
     }
 
     private void Start()
@@ -27,21 +53,43 @@ public class PlayerStateManager : NetworkBehaviour
         SetEverythingActive(true);
     }
 
-    private void OnDestroy()
+    private void OnDeathStatusChangedHook(bool oldStatus, bool newStatus)
     {
-        ScreenManager.onPaused -= HandlePause;
-        GameManager.onStartMatch -= MatchStarted;
-        GameManager.onEndMatch -= MatchEnded;
+        SetPlayerAliveStatus(!newStatus);
     }
 
-    private void HandlePause(bool isPaused) => SetEverythingActive(!isPaused);
-    private void MatchStarted() => SetEverythingActive(true);
-    private void MatchEnded() => SetEverythingActive(false);
+    private void HandlePause(bool isPaused)
+    {
+        _isPaused = isPaused;
+        SetEverythingActive(!isPaused);
+    }
+
+    private void MatchStarted()
+    {
+        _isPaused = false;
+        SetEverythingActive(true);
+    }
+
+    private void MatchEnded()
+    {
+        _isPaused = true;
+        SetEverythingActive(false);
+    }
 
     private void SetEverythingActive(bool isActive)
     {
-        Cursor.visible = !isActive;
-        Cursor.lockState = isActive ? CursorLockMode.Locked : CursorLockMode.None;
+        IsControlsActive = isActive;
+
+        if (_isPaused)
+        {
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+        }
+        else
+        {
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+        }
         
         if (_playerController != null) _playerController.enabled = isActive;
         if (_cameraController != null) _cameraController.enabled = isActive;
@@ -57,7 +105,21 @@ public class PlayerStateManager : NetworkBehaviour
         if (TryGetComponent<CharacterController>(out CharacterController characterController))
         {
             characterController.enabled = isActive;
-            Debug.Log("asd");
         }
+    }
+
+    public void SetPlayerAliveStatus(bool isAlive)
+    {
+        SetEverythingActive(isAlive);
+
+        if (_playerModel != null) _playerModel.SetActive(isAlive);
+    }
+
+    public void RespawnLocalPlayer(Vector3 spawnPos, Quaternion spawnRot)
+    {
+        if (_characterController != null) _characterController.enabled = false;
+
+        transform.position = spawnPos;
+        transform.rotation = spawnRot;
     }
 }

@@ -6,8 +6,6 @@ public class PlayerController : NetworkBehaviour
     private CharacterController _characterController;
     private PlayerStats _playerStats;
 
-    [SerializeField] private Camera _mainCamera;
-
     [SerializeField] private float _gravity;
 
     private float _currentVerticalVelocity;
@@ -22,15 +20,6 @@ public class PlayerController : NetworkBehaviour
     {
         _characterController = GetComponent<CharacterController>();
         _playerStats = GetComponent<PlayerStats>();
-    }
-
-    private void Start()
-    {
-        if (!isLocalPlayer)
-        {
-            enabled = false;
-            return;
-        }
     }
 
     private void Update()

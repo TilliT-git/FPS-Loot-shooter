@@ -8,6 +8,7 @@ public class PlayerHealth : NetworkBehaviour
     private PlayerStats _playerStats;
     private CharacterController _characterController;
     private NetworkTransformReliable _networkTransform;
+    private PlayerStateManager _playerStateManager;
 
     private float _maxHealth;
     public float MaxHealth => _maxHealth;
@@ -16,15 +17,10 @@ public class PlayerHealth : NetworkBehaviour
     private float _currentHealth;
     public float CurrentHealth => _currentHealth;
 
-    [SyncVar(hook = nameof(OnDeathStatusChangedHook))]
-    private bool _isDeath = false;
-    public bool IsDeath => _isDeath;
-
     [SerializeField] private GameObject _playerModel;
     [SerializeField] private float _respawnDelay = 3f;
 
     public Action <float, float> onHealthChange;
-    public Action onDeath;
 
     Coroutine _respawnCoroutine;
 
@@ -33,6 +29,7 @@ public class PlayerHealth : NetworkBehaviour
         _playerStats = GetComponent<PlayerStats>();
         _characterController = GetComponent<CharacterController>();
         _networkTransform = GetComponent<NetworkTransformReliable>();
+        _playerStateManager = GetComponent<PlayerStateManager>();
 
         _maxHealth = _playerStats.MaxHealth;
 
@@ -56,7 +53,7 @@ public class PlayerHealth : NetworkBehaviour
         _currentHealth = _maxHealth;
         HealthChange(_currentHealth, _maxHealth);
 
-        TogglePlayerState(!_isDeath);
+        TogglePlayerState(!_playerStateManager.IsDeath);
     }
 
     private void OnHealthChangedHook(float oldHealth, float newHealth)
@@ -67,20 +64,10 @@ public class PlayerHealth : NetworkBehaviour
         }
     }
 
-    private void OnDeathStatusChangedHook(bool oldStatus, bool newStatus)
-    {
-        TogglePlayerState(!newStatus);
-
-        if (newStatus)
-        {
-            onDeath?.Invoke();
-        }
-    }
-
     [Server]
     public void TakeDamage(float damageAmount, GameObject attacker)
     {
-        if (_isDeath) return;
+        if (_playerStateManager.IsDeath) return;
 
         _currentHealth -= damageAmount;
 
@@ -94,7 +81,7 @@ public class PlayerHealth : NetworkBehaviour
     [Server]
     private void ServerDeath(GameObject attacker)
     {
-        _isDeath = true;
+        _playerStateManager.SetDeathStatus(true);
 
         if (_playerStats != null) _playerStats.AddDeath();
 
@@ -148,21 +135,20 @@ public class PlayerHealth : NetworkBehaviour
         yield return new WaitForSeconds(0.15f);
 
         _currentHealth = _maxHealth;
-        _isDeath = false;
+        _playerStateManager.SetDeathStatus(false);
         _respawnCoroutine = null;
     }
 
     [ClientRpc]
     private void RpcTeleportClient(Vector3 spawnPos, Quaternion spawnRot)
     {
-        if (!isLocalPlayer) return;
-
-        if (_characterController != null) _characterController.enabled = false;
-
-        transform.position = spawnPos;
-        transform.rotation = spawnRot;
-
-        if (_characterController != null) _characterController.enabled = true;
+        if (isLocalPlayer)
+        {
+            if (TryGetComponent<PlayerStateManager>(out PlayerStateManager playerStateManager))
+            {
+                playerStateManager.RespawnLocalPlayer(spawnPos, spawnRot);
+            }
+        }
     }
 
     private void TogglePlayerState(bool isAlive)

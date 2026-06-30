@@ -3097,7 +3097,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2016451350947934983, guid: 3a20b597f85e626408b43b58e2c33e13, type: 3}
       propertyPath: _killsToWin
-      value: 1
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3289572208535776532, guid: 3a20b597f85e626408b43b58e2c33e13, type: 3}
       propertyPath: _timerText

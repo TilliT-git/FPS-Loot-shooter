@@ -26,7 +26,7 @@ public class LeaveMatchButton : MonoBehaviour
         }
         else if (NetworkClient.isConnected)
         {
-            NetworkManager.singleton.StartClient();
+            NetworkManager.singleton.StopClient();
             onLeaveMatch?.Invoke();
         }
         else if (NetworkServer.active)

@@ -469,7 +469,6 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  _mainCamera: {fileID: 8221213887269020406}
   _gravity: -9.81
 --- !u!114 &6417232614245635576
 MonoBehaviour:
@@ -587,9 +586,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  _playerController: {fileID: 2620267595637791142}
-  _cameraController: {fileID: -4872182992595241153}
-  _weaponChanger: {fileID: 8734869626074296793}
+  _playerModel: {fileID: 7197418410035305306}
   _weapons:
   - {fileID: 4361277200073351879}
   - {fileID: 3443322804040620187}
