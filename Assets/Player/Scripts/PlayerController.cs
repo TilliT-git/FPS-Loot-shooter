@@ -1,4 +1,5 @@
 using Mirror;
+using System;
 using UnityEngine;
 
 public class PlayerController : NetworkBehaviour
@@ -13,13 +14,21 @@ public class PlayerController : NetworkBehaviour
     private float _horizontalInput;
     private float _verticalInput;
 
+    private float _currentStamina;
+    private float _maxStamina;
+
     private bool _isSprint;
     public bool IsSprint => _isSprint;
+
+    public static Action<float, float> onStaminaChange;
 
     private void Awake()
     {
         _characterController = GetComponent<CharacterController>();
         _playerStats = GetComponent<PlayerStats>();
+
+        _maxStamina = _playerStats.Stamina;
+        _currentStamina = _maxStamina;
     }
 
     private void Update()
@@ -32,14 +41,29 @@ public class PlayerController : NetworkBehaviour
 
         if (_characterController.isGrounded && Input.GetKeyDown(KeyCode.Space)) Jump();
 
+        Sprint();
+    }
+
+    private void Sprint()
+    {
         if (Input.GetKey(KeyCode.LeftShift))
         {
             _isSprint = true;
+            if (_currentStamina > 0)
+            {
+                _currentStamina -= Time.deltaTime;
+            }
         }
         else
         {
             _isSprint = false;
+            if (_currentStamina < _maxStamina)
+            {
+                _currentStamina += Time.deltaTime;
+            }
         }
+
+        onStaminaChange?.Invoke(_currentStamina, _maxStamina);
     }
 
     private void FixedUpdate()

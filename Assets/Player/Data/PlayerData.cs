@@ -11,4 +11,6 @@ public class PlayerData : ScriptableObject
     public float JumpForce => _jumpForce;
     [SerializeField] private float _sprintSpeedMultiplier;
     public float SprintSpeedMultiplier => _sprintSpeedMultiplier;
+    [SerializeField] private float _stamina;
+    public float Stamina => _stamina;
 }

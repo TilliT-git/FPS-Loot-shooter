@@ -29,6 +29,7 @@ public class PlayerStats : NetworkBehaviour
     public float JumpForce => _playerData != null ? _playerData.JumpForce : 5f;
     public float SprintSpeedMultiplier => _playerData != null ? _playerData.SprintSpeedMultiplier : 1f;
 
+    public float Stamina => _playerData != null ? _playerData.Stamina : 100f;
     public float WalkSpeedMultiplier => _currentWeapon != null ? _currentWeapon.weaponData.WalkSpeedMultiplier : 1f;
     public float AimSpeedMultiplier => _currentWeapon != null ? _currentWeapon.weaponData.AimSpeedMultiplier : 1f;
     public bool IsAiming => _currentWeapon != null ? _currentWeapon.IsAiming : false;

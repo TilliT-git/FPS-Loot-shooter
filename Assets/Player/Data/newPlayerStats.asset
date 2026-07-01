@@ -16,3 +16,4 @@ MonoBehaviour:
   _moveSpeed: 10
   _jumpForce: 1
   _sprintSpeedMultiplier: 2
+  _stamina: 10
