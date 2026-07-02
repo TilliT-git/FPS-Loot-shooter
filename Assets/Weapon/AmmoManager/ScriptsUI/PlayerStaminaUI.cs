@@ -23,6 +23,18 @@ public class PlayerStaminaUI : MonoBehaviour
         }
     }
 
+    public void Initialize(PlayerController playerController)
+    {
+        _playerController = playerController;
+
+        if (_playerController != null)
+        {
+            PlayerController.onStaminaChange += UpdateStaminaUI;
+
+            UpdateStaminaUI(_playerController.CurrentStamina, _playerController.MaxStamina);
+        }
+    }
+
     private void OnDisable()
     {
         if (_playerController != null)

@@ -15,7 +15,9 @@ public class PlayerController : NetworkBehaviour
     private float _verticalInput;
 
     private float _currentStamina;
+    public float CurrentStamina => _currentStamina;
     private float _maxStamina;
+    public float MaxStamina => _maxStamina;
 
     private bool _isSprint;
     public bool IsSprint => _isSprint;

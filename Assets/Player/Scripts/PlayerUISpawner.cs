@@ -38,6 +38,14 @@ public class PlayerUISpawner : NetworkBehaviour
         {
             statisticsUI.Initialize(stats);
         }
+
+        PlayerStaminaUI staminaUI = _uiInstance.GetComponentInChildren<PlayerStaminaUI>();
+        PlayerController playerController = GetComponent<PlayerController>();
+
+        if (staminaUI != null && playerController != null)
+        {
+            staminaUI.Initialize(playerController);
+        }
     }
 
     private void OnDestroy()
